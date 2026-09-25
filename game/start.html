@@ -10008,7 +10008,10 @@ function buildAK74(THREE, opts) {
        и в прицел попадает лишь краем снизу — как в жизни. */
     left: {
       node: 'gripL',
-      offset: [-0.004, -0.055, 0.020],
+      /* -0,068: кисть реалистичной модели (перчатка поверх ладони MakeHuman)
+         крупнее процедурной, и при -0,055 пальцы, сомкнутые поверх цевья,
+         закрывали мушку в прицеле. */
+      offset: [-0.004, -0.068, 0.020],
       fingerDir: [0.20, 0.86, 0.47],
       palmDir: [0.96, -0.24, -0.12],
       curl: [1.02, 1.08, 1.06, 0.98],
@@ -10208,7 +10211,7 @@ function buildAK74(THREE, opts) {
       /* пальцы обхватывают */
       const trig = side > 0 ? this.triggerCurl : undefined;
       this.thumbAmount = G.thumb;
-      curlFingers(this, side, side > 0 ? 1.02 : 0.98, trig);
+      curlFingers(this, side, side > 0 ? 1.02 : 0.90, trig);
     }
   };
 

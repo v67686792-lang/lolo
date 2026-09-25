@@ -39,8 +39,9 @@ def tpose(arm):
         hw = head('hand_'+S)
         for f in ('index','middle','ring','pinky'):
             k = head(f+'_01_'+S)
-            fd = k - hw; fd.z = 0; fd.normalize()
-            fd = (fd + d*1.5).normalized()
+            # фаланги параллельны оси руки: при сгибе вокруг локальной Z риг
+            # сжимает кулак, а не разводит пальцы веером
+            fd = d.copy()
             for i in ('01','02','03'): aim(f+'_'+i+'_'+S, fd)
         # большой палец: вдоль руки, на 22° вперёд (-Y) и на 12° вниз
         td = Vector((s*math.cos(math.radians(22)), -math.sin(math.radians(22)), 0))
