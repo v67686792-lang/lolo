@@ -9636,7 +9636,8 @@ function buildAK74(THREE, opts) {
       if (!geo) continue;
       const mesh = new THREE.SkinnedMesh(geo, mats[g]);
       mesh.name = key + '_' + g;
-      mesh.castShadow = !(mats[g] && mats[g].transparent);
+      /* мелочь на лице и снаряжении тень не отбрасывает: экономия проходов */
+      mesh.castShadow = !(mats[g] && mats[g].transparent) && !['brow', 'lash', 'cornea', 'eye', 'patch', 'headRubber'].includes(g);
       mesh.receiveShadow = true;
       mesh.frustumCulled = false;
       if (mats[g] && mats[g].transparent) mesh.renderOrder = 2;
@@ -9816,15 +9817,16 @@ function buildAK74(THREE, opts) {
 
     const skin = new THREE.MeshStandardMaterial({
       map: tx('skin', 'map', true), normalMap: tx('skin', 'normalMap'),
-      normalScale: new THREE.Vector2(0.55, 0.55),
-      roughnessMap: tx('skin', 'roughnessMap'), roughness: 1, metalness: 0
+      normalScale: new THREE.Vector2(0.22, 0.22),
+      roughnessMap: tx('skin', 'roughnessMap'), roughness: 1, metalness: 0,
+      envMapIntensity: 0.7
     });
     /* подповерхностное рассеивание: тёплый ореол по краю и мягкий
        терминатор — кожа не должна выглядеть пластиком */
     skin.onBeforeCompile = (sh) => {
       sh.fragmentShader = sh.fragmentShader.replace('#include <lights_fragment_end>', `#include <lights_fragment_end>
         float sssRim = pow(clamp(1.0 - dot(normal, normalize(vViewPosition)), 0.0, 1.0), 2.4);
-        reflectedLight.indirectDiffuse += sssRim * vec3(0.16, 0.05, 0.03) * diffuseColor.rgb;
+        reflectedLight.indirectDiffuse += sssRim * vec3(0.07, 0.022, 0.012) * diffuseColor.rgb;
         reflectedLight.directDiffuse *= vec3(1.0, 0.96, 0.94);`);
     };
     out.skin = skin;
@@ -14653,11 +14655,19 @@ function buildAK74(THREE, opts) {
        кадре торчит изнанка шлема или поля панамы. Остальное тело видно —
        как в бодикаме. */
     const HEAD_GROUPS = ['skin', 'helmet', 'hat', 'eye', 'hair', 'mask', 'headGear', 'headHard', 'headRubber', 'brow', 'lash', 'headset', 'cornea'];
+    /* Мелкие детали (брови, ресницы, роговица, нашивка, мелочь на шлеме)
+       дальше LOD_FAR м не различимы — их меши не рисуются: это экономит
+       вызовы отрисовки, когда боец далеко. */
+    const DETAIL_GROUPS = ['brow', 'lash', 'cornea', 'patch', 'headRubber', 'headGear'];
+    const LOD_FAR = 18;
+    const _lodV = new THREE.Vector3();
     function updateSelfVisibility() {
       for (let i = 0; i < squad.length; i++) {
         const s = squad[i];
         const hide = i === S.activeIdx;
         for (const g of HEAD_GROUPS) if (s.char.meshes[g]) s.char.meshes[g].visible = !hide;
+        const far = s.char.root.getWorldPosition(_lodV).distanceTo(camera.position) > LOD_FAR;
+        if (far) for (const g of DETAIL_GROUPS) if (s.char.meshes[g]) s.char.meshes[g].visible = false;
       }
     }
 
