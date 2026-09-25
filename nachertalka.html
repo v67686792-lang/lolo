@@ -1,0 +1,2508 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Начертательная геометрия — карта к зачёту</title>
+<meta name="description" content="Интерактивная карта по начертательной геометрии: проецирование, эпюр Монжа, положение прямой, метод прямоугольного треугольника, разбор ДЗ 1-01…1-16 и нарешка.">
+<meta name="theme-color" content="#090b11">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Manrope:wght@400;500;600;700;800&family=Unbounded:wght@500;700&display=swap" rel="stylesheet">
+<style>
+/* ===== Начертательная геометрия · интерактивная карта к зачёту ===== */
+:root{
+  --bg:#090b11;--bg2:#0d1018;--panel:#10141e;--panel2:#151a26;--panel3:#1b2130;
+  --line:rgba(255,255,255,.07);--line2:rgba(255,255,255,.13);
+  --text:#e8ebf4;--muted:#8a93a8;--muted2:#5f6779;
+  --acc:#a293ff;--acc2:#4cd3ff;--acc3:#57e3a4;
+  --good:#57e3a4;--bad:#ff5f78;--warn:#ffc15e;
+  /* язык цветов чертежа */
+  --p1:#4cc9ff;--p2:#b197fc;--p3:#ff9f43;--dd:#ffd43b;--nv:#51e0a0;--ang:#ff6b8b;
+  --aux:#8b93ab;--axis:#c9cfdd;--gridc:rgba(255,255,255,.045);--gridc2:rgba(255,255,255,.085);
+  --figbg:#0c0f17;
+  --mono:'JetBrains Mono',ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  --sans:'Manrope',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
+  --disp:'Unbounded','Manrope',system-ui,sans-serif;
+  --r:18px;--toc:280px;
+}
+html.light{
+  --bg:#f4f5fa;--bg2:#eceef6;--panel:#ffffff;--panel2:#f5f6fb;--panel3:#eceef6;
+  --line:rgba(10,20,50,.09);--line2:rgba(10,20,50,.16);
+  --text:#171b29;--muted:#5b647a;--muted2:#8a92a6;
+  --acc:#6b52f5;--acc2:#0a93c9;--acc3:#12a36a;
+  --good:#12a36a;--bad:#e03553;--warn:#d98a00;
+  --p1:#0a8fd1;--p2:#7048e8;--p3:#e8590c;--dd:#c98f00;--nv:#0f9d63;--ang:#e0305a;
+  --aux:#7b8398;--axis:#3a4050;--gridc:rgba(10,40,120,.06);--gridc2:rgba(10,40,120,.11);
+  --figbg:#fbfcff;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--text);font:16px/1.6 var(--sans);overflow-x:hidden}
+a{color:var(--acc2)}
+b,strong{font-weight:700}
+button{font:inherit;color:inherit;cursor:pointer}
+.mono{font-family:var(--mono)}
+.muted{color:var(--muted)}
+.c-p1{color:var(--p1)}.c-p2{color:var(--p2)}.c-p3{color:var(--p3)}.c-dd{color:var(--dd)}.c-nv{color:var(--nv)}.c-ang{color:var(--ang)}.c-aux{color:var(--aux)}
+.c-good{color:var(--good)}.c-bad{color:var(--bad)}.c-warn{color:var(--warn)}
+
+/* ---------- каркас ---------- */
+.toc{position:fixed;inset:0 auto 0 0;width:var(--toc);background:var(--bg2);border-right:1px solid var(--line);overflow-y:auto;padding:22px 16px 40px;z-index:50;transition:transform .25s}
+.brand{display:flex;align-items:center;gap:10px;font:700 17px var(--disp);margin:0 6px 14px;text-decoration:none;color:var(--text)}
+.brand i{width:34px;height:34px;border-radius:10px;background:var(--panel3);display:grid;place-items:center;font-style:normal;font-size:18px;border:1px solid var(--line2)}
+.prog{margin:0 6px 16px;font-size:13px;color:var(--muted)}
+.prog .bar{height:6px;border-radius:9px;background:var(--panel3);margin-top:6px;overflow:hidden}
+.prog .bar i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--acc),var(--acc2),var(--acc3));transition:width .4s}
+.toc h6{margin:16px 8px 6px;font:600 11px var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--muted2)}
+.toc a.ti{display:flex;align-items:center;gap:10px;padding:7px 8px;border-radius:10px;color:var(--muted);text-decoration:none;font-size:14.5px}
+.toc a.ti:hover{background:var(--panel2);color:var(--text)}
+.toc a.ti.on{background:var(--panel3);color:var(--text)}
+.toc a.ti span{min-width:24px;height:24px;border-radius:7px;background:var(--panel3);border:1px solid var(--line2);display:grid;place-items:center;font:600 11px var(--mono)}
+.toc a.ti.star span{background:linear-gradient(135deg,var(--acc),var(--acc2));color:#fff;border:0}
+.topbar{display:none}
+main{margin-left:var(--toc);padding:0 clamp(16px,4vw,56px) 80px;max-width:calc(1180px + var(--toc))}
+.themebtn{position:fixed;top:14px;right:16px;z-index:60;width:40px;height:40px;border-radius:12px;border:1px solid var(--line2);background:var(--panel);font-size:18px}
+
+/* ---------- hero ---------- */
+.hero{min-height:88vh;display:flex;flex-direction:column;justify-content:center;padding:60px 0 30px}
+.tag{display:inline-flex;align-items:center;gap:8px;padding:6px 14px;border-radius:99px;border:1px solid var(--line2);background:var(--panel);font:600 11.5px var(--mono);letter-spacing:.12em;color:var(--acc2);text-transform:uppercase;width:max-content;max-width:100%}
+.tag:before{content:"";width:7px;height:7px;border-radius:50%;background:var(--acc2);box-shadow:0 0 10px var(--acc2)}
+.hero h1{font:700 clamp(34px,6vw,64px)/1.05 var(--disp);margin:22px 0 18px;letter-spacing:-.01em}
+.grad{background:linear-gradient(90deg,var(--acc),var(--acc2) 55%,var(--acc3));-webkit-background-clip:text;background-clip:text;color:transparent}
+.hero p.lead{font-size:clamp(16px,2vw,19px);color:var(--muted);max-width:760px;margin:0 0 26px}
+.hero p.lead b{color:var(--text)}
+.btns{display:flex;flex-wrap:wrap;gap:10px}
+.btn{display:inline-flex;align-items:center;gap:8px;padding:11px 18px;border-radius:12px;border:1px solid var(--line2);background:var(--panel);color:var(--text);text-decoration:none;font-weight:700;font-size:15px;transition:.15s}
+.btn:hover{border-color:var(--acc);transform:translateY(-1px)}
+.btn.pri{background:linear-gradient(135deg,var(--acc),var(--acc2));border:0;color:#fff;box-shadow:0 8px 30px -8px var(--acc)}
+.btn.sm{padding:7px 12px;font-size:13.5px;border-radius:10px}
+.btn:disabled{opacity:.4;cursor:default;transform:none}
+
+/* ---------- секции ---------- */
+.sec{padding:56px 0 10px;border-top:1px solid var(--line);scroll-margin-top:10px}
+.sec-head{display:flex;gap:18px;align-items:flex-start;margin-bottom:22px}
+.sec-no{font:700 15px var(--mono);color:var(--acc);border:1px solid var(--line2);border-radius:12px;padding:8px 11px;background:var(--panel)}
+.sec h2{font:700 clamp(22px,3.2vw,32px)/1.2 var(--disp);margin:0}
+.sec-sub{color:var(--muted);margin-top:6px}
+h3{font:700 20px/1.3 var(--disp);margin:34px 0 12px}
+h4{font-size:17px;margin:0 0 8px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:20px 22px;margin:14px 0}
+.card>:first-child{margin-top:0}.card>:last-child{margin-bottom:0}
+.theory{border-left:3px solid var(--acc)}
+.def{background:linear-gradient(135deg,rgba(162,147,255,.11),rgba(76,211,255,.06));border:1px solid rgba(162,147,255,.28);border-radius:14px;padding:14px 18px;margin:12px 0}
+html.light .def{background:linear-gradient(135deg,rgba(107,82,245,.08),rgba(10,147,201,.05))}
+.idea{border-radius:14px;padding:13px 16px 13px 48px;margin:12px 0;position:relative;background:var(--panel2);border:1px solid var(--line)}
+.idea:before{content:"💡";position:absolute;left:15px;top:12px;font-size:19px}
+.idea.warn:before{content:"⚠️"}.idea.err:before{content:"❌"}.idea.good:before{content:"✅"}.idea.exam:before{content:"🎯"}.idea.why:before{content:"🤔"}
+.idea.warn{border-color:rgba(255,193,94,.35)}.idea.err{border-color:rgba(255,95,120,.35)}.idea.good{border-color:rgba(87,227,164,.35)}.idea.exam{border-color:rgba(76,211,255,.4)}
+.grid2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+.grid3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+.grid2>.card,.grid3>.card{margin:0}
+ul.clean,ol.clean{padding-left:20px;margin:8px 0}
+ul.clean li,ol.clean li{margin:5px 0}
+.formula{font-family:var(--mono);background:var(--panel2);border:1px solid var(--line);border-radius:12px;padding:10px 14px;margin:10px 0;overflow-x:auto;white-space:nowrap}
+.kbd{font:600 12px var(--mono);border:1px solid var(--line2);border-bottom-width:2px;border-radius:6px;padding:1px 6px;background:var(--panel2)}
+.pill{display:inline-block;font:600 12px var(--mono);padding:2px 9px;border-radius:99px;border:1px solid var(--line2);background:var(--panel2);vertical-align:middle}
+.legend{display:flex;flex-wrap:wrap;gap:8px 16px;font-size:14px}
+.legend span{display:inline-flex;align-items:center;gap:7px}
+.legend i{width:22px;height:4px;border-radius:3px;display:inline-block}
+table.t{width:100%;border-collapse:collapse;font-size:14.5px}
+table.t th,table.t td{border-bottom:1px solid var(--line);padding:9px 8px;text-align:left;vertical-align:top}
+table.t th{font:600 12px var(--mono);color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
+.tscroll{overflow-x:auto;-webkit-overflow-scrolling:touch}
+details.why{background:var(--panel2);border:1px solid rgba(255,114,176,.3);border-radius:14px;margin:12px 0}
+details.why summary{cursor:pointer;padding:11px 16px;font-weight:700;list-style:none}
+details.why summary::-webkit-details-marker{display:none}
+details.why summary:before{content:"🤔 ";}
+details.why[open] summary{border-bottom:1px solid var(--line)}
+details.why>div{padding:12px 16px}
+
+/* ---------- карта ---------- */
+.map{position:relative;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px 18px}
+.mnode{position:relative;text-align:left;background:var(--panel);border:1px solid var(--line2);border-radius:16px;padding:12px 14px;transition:.15s;min-height:92px}
+.mnode:hover,.mnode.on{border-color:var(--acc);box-shadow:0 0 0 3px rgba(162,147,255,.15)}
+.mnode b{display:block;font-size:14.5px;line-height:1.3}
+.mnode small{display:block;color:var(--muted);font-size:12.5px;margin-top:4px;line-height:1.35}
+.mnode .mn{font:600 10.5px var(--mono);color:var(--acc);letter-spacing:.1em}
+.mnode.goal{border-color:rgba(87,227,164,.5)}
+.mnode.goal .mn{color:var(--good)}
+.mrow-arrow{grid-column:1/-1;text-align:center;color:var(--muted2);font-size:13px;margin:-6px 0}
+.mpanel{margin-top:14px;min-height:70px}
+
+/* ---------- фигуры / эпюр ---------- */
+.fig{background:var(--figbg);border:1px solid var(--line);border-radius:16px;overflow:hidden;position:relative}
+.fig svg{display:block;width:100%;height:auto;max-height:72vh;touch-action:pan-y}
+.fig .figcap{position:absolute;left:10px;top:8px;font:600 11px var(--mono);color:var(--muted2);letter-spacing:.08em;pointer-events:none}
+svg .ep-text{font-family:var(--sans);font-weight:700;paint-order:stroke;stroke:var(--figbg);stroke-linejoin:round}
+svg .ep-val{font-family:var(--mono);font-weight:600}
+.s-p1{stroke:var(--p1)}.s-p2{stroke:var(--p2)}.s-p3{stroke:var(--p3)}.s-dd{stroke:var(--dd)}.s-nv{stroke:var(--nv)}.s-ang{stroke:var(--ang)}.s-aux{stroke:var(--aux)}.s-link{stroke:var(--aux)}.s-axis{stroke:var(--axis)}.s-txt{stroke:var(--text)}
+.f-p1{fill:var(--p1)}.f-p2{fill:var(--p2)}.f-p3{fill:var(--p3)}.f-dd{fill:var(--dd)}.f-nv{fill:var(--nv)}.f-ang{fill:var(--ang)}.f-aux{fill:var(--aux)}.f-link{fill:var(--aux)}.f-axis{fill:var(--axis)}.f-txt{fill:var(--text)}
+svg .glow{opacity:.28;stroke-linecap:round}
+svg .el-new{animation:epPop .5s ease both}
+@keyframes epPop{from{opacity:0}to{opacity:1}}
+svg .pulse{animation:epPulse 1.3s ease-in-out infinite}
+@keyframes epPulse{0%,100%{opacity:.18}50%{opacity:.42}}
+
+/* ---------- пошаговый плеер ---------- */
+.player{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(0,1fr);gap:16px;margin:14px 0;align-items:start}
+.player .side{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:16px 18px;position:sticky;top:12px}
+.pl-count{font:600 12px var(--mono);color:var(--muted);display:flex;justify-content:space-between;align-items:center;gap:8px}
+.pl-title{font:700 17px/1.3 var(--disp);margin:8px 0 8px}
+.pl-text{font-size:15.5px;min-height:96px}
+.pl-text p{margin:0 0 8px}
+.pl-ctrl{display:flex;align-items:center;gap:8px;margin-top:14px}
+.pl-ctrl .btn{flex:0 0 auto}
+.pl-ctrl .next{flex:1;justify-content:center}
+.dots{display:flex;flex-wrap:wrap;gap:5px;margin-top:12px}
+.dots i{width:9px;height:9px;border-radius:50%;background:var(--panel3);border:1px solid var(--line2);cursor:pointer}
+.dots i.on{background:var(--acc)}.dots i.cur{background:var(--acc2);box-shadow:0 0 8px var(--acc2)}
+.pl-hint{font-size:12px;color:var(--muted2);margin-top:8px}
+
+/* ---------- конструктор оформления ---------- */
+.cons{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:16px;margin:14px 0}
+.cons-top{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:10px}
+.cons-top h4{margin:0}
+.cons-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.15fr);gap:14px}
+.zone{border:1.5px dashed var(--line2);border-radius:14px;padding:10px;min-height:90px;background:var(--panel2);transition:.15s}
+.zone.act{border-color:var(--acc);border-style:solid}
+.zone.over{background:rgba(162,147,255,.1);border-color:var(--acc2)}
+.zone-h{display:flex;justify-content:space-between;align-items:center;font:700 13px var(--mono);letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin:0 2px 8px;cursor:pointer}
+.zone-h em{font-style:normal;font-size:11px;color:var(--acc2);text-transform:none;letter-spacing:0}
+.zone.act .zone-h{color:var(--text)}
+.zlist{display:flex;flex-direction:column;gap:7px;min-height:40px}
+.zempty{color:var(--muted2);font-size:13.5px;padding:8px 4px}
+.bank{display:flex;flex-wrap:wrap;gap:8px;align-content:flex-start}
+.ccard{display:flex;align-items:flex-start;gap:6px;background:var(--panel);border:1px solid var(--line2);border-radius:11px;padding:7px 8px 7px 4px;font-size:14px;line-height:1.35;user-select:none;-webkit-user-select:none;position:relative;transition:border-color .15s,background .15s}
+.bank .ccard{max-width:100%}
+.ccard .hdl{touch-action:none;cursor:grab;color:var(--muted2);padding:0 4px;font-size:15px;line-height:1.2;flex:0 0 auto}
+.ccard .ctext{flex:1;cursor:pointer;min-width:0;overflow-wrap:anywhere}
+.ccard .cno{font:700 12px var(--mono);color:var(--acc);margin-right:4px}
+.ccard .cbtns{display:flex;gap:2px;flex:0 0 auto}
+.ccard .cbtns button{border:0;background:transparent;color:var(--muted);width:24px;height:24px;border-radius:6px;font-size:13px;padding:0}
+.ccard .cbtns button:hover{background:var(--panel3);color:var(--text)}
+.ccard:hover{border-color:var(--acc)}
+.ccard.ok{border-color:var(--good);background:rgba(87,227,164,.08)}
+.ccard.bad{border-color:var(--bad);background:rgba(255,95,120,.08)}
+.ccard.pos{border-color:var(--warn);background:rgba(255,193,94,.08)}
+.ccard .cwhy{display:none;font-size:13px;color:var(--muted);margin-top:5px;line-height:1.4}
+.ccard.ok .cwhy,.ccard.bad .cwhy,.ccard.pos .cwhy{display:block}
+.ccard .mark{font-weight:800;margin-right:4px}
+.ghost{position:fixed;z-index:999;pointer-events:none;opacity:.92;transform:rotate(-1.5deg);box-shadow:0 12px 30px rgba(0,0,0,.4);max-width:320px}
+.cons-foot{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px;align-items:center}
+.verdict{margin-top:10px;border-radius:12px;padding:10px 14px;font-size:14.5px;display:none}
+.verdict.show{display:block}
+.verdict.good{background:rgba(87,227,164,.1);border:1px solid rgba(87,227,164,.35)}
+.verdict.bad{background:rgba(255,95,120,.08);border:1px solid rgba(255,95,120,.3)}
+.bank-wrap{margin-top:12px}
+.bank-wrap .zone-h{cursor:default}
+
+/* ---------- задачи ---------- */
+.tasks{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:12px}
+.tcard{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:10px;text-align:left;transition:.15s;display:flex;flex-direction:column;gap:6px}
+.tcard:hover,.tcard.on{border-color:var(--acc)}
+.tcard.mine{border-color:rgba(76,211,255,.6);box-shadow:0 0 0 3px rgba(76,211,255,.12)}
+.tcard .tno{font:700 14px var(--mono);display:flex;justify-content:space-between;align-items:center}
+.tcard .tno em{font-style:normal;font-size:11px;color:var(--acc2)}
+.tcard .tq{font-size:12.5px;color:var(--muted);line-height:1.35}
+.tcard .thumb{background:var(--figbg);border-radius:10px;border:1px solid var(--line);aspect-ratio:1.35/1;overflow:hidden;position:relative}
+.tcard .thumb .fig{position:absolute;inset:0;border:0;border-radius:0;background:transparent}
+.tcard .thumb svg{width:100%;height:100%;max-height:none;display:block}
+.tcard.done .tno:after{content:"✓";color:var(--good)}
+.tpanel{margin:16px 0 8px;border:1px solid var(--line2);border-radius:20px;padding:18px;background:var(--bg2);scroll-margin-top:12px}
+.tpanel-h{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap}
+.tpanel-h h3{margin:0}
+.tabs{display:flex;flex-wrap:wrap;gap:6px;margin:14px 0 4px}
+.tabs button{border:1px solid var(--line2);background:var(--panel);border-radius:10px;padding:7px 12px;font-weight:700;font-size:14px;color:var(--muted)}
+.tabs button.on{background:var(--panel3);color:var(--text);border-color:var(--acc)}
+.answer{display:flex;flex-wrap:wrap;gap:10px;align-items:flex-end;margin-top:8px}
+.answer label{display:flex;flex-direction:column;font-size:13px;color:var(--muted);gap:4px}
+.answer input{width:110px;padding:9px 10px;border-radius:10px;border:1px solid var(--line2);background:var(--panel2);color:var(--text);font:600 15px var(--mono)}
+.answer input.ok{border-color:var(--good)}.answer input.bad{border-color:var(--bad)}
+.res{margin-top:10px;font-size:14.5px}
+.opts{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:8px;margin:12px 0}
+.opt{border:1px solid var(--line2);background:var(--panel);border-radius:12px;padding:10px 12px;text-align:left;font-weight:600;font-size:14.5px;transition:.15s}
+.opt:hover{border-color:var(--acc)}
+.opt.ok{border-color:var(--good);background:rgba(87,227,164,.1)}
+.opt.bad{border-color:var(--bad);background:rgba(255,95,120,.08)}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0}
+.chip{border:1px solid var(--line2);background:var(--panel);border-radius:99px;padding:7px 13px;font-size:14px;text-align:left}
+.chip.sel{border-color:var(--acc);background:rgba(162,147,255,.14)}
+.chip.ok{border-color:var(--good);background:rgba(87,227,164,.12)}
+.chip.bad{border-color:var(--bad);background:rgba(255,95,120,.1)}
+.chip.miss{border-color:var(--warn);border-style:dashed}
+.score{font:700 14px var(--mono);color:var(--muted)}
+.score b{color:var(--good)}
+
+/* ---------- 3D ---------- */
+.v3d{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:14px}
+.v3d .fig svg{touch-action:pan-y;cursor:grab}
+.vbtns{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.slider{display:flex;align-items:center;gap:10px;margin:8px 0;font-size:14px}
+.slider input[type=range]{flex:1;accent-color:var(--acc)}
+.slider b{font-family:var(--mono);min-width:48px;text-align:right}
+.types9{display:flex;flex-wrap:wrap;gap:6px;margin:10px 0}
+
+/* ---------- флеш-карточки ---------- */
+.flash{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:12px}
+.fc{perspective:1000px;min-height:150px;cursor:pointer;background:none;border:0;padding:0;text-align:left}
+.fc-in{position:relative;width:100%;height:100%;min-height:150px;transition:transform .5s;transform-style:preserve-3d}
+.fc.flip .fc-in{transform:rotateY(180deg)}
+.fc-f,.fc-b{position:absolute;inset:0;backface-visibility:hidden;-webkit-backface-visibility:hidden;border-radius:16px;border:1px solid var(--line2);padding:14px 16px;background:var(--panel);display:flex;flex-direction:column;gap:6px;font-size:14.5px;overflow:auto}
+.fc-b{transform:rotateY(180deg);background:var(--panel2);border-color:rgba(87,227,164,.4)}
+.fc small{font:600 11px var(--mono);color:var(--muted2);text-transform:uppercase;letter-spacing:.1em}
+
+.foot{margin-top:60px;color:var(--muted2);font-size:13px;border-top:1px solid var(--line);padding-top:20px}
+
+/* ---------- адаптив ---------- */
+@media (max-width:1100px){
+  .player{grid-template-columns:1fr}
+  .player .side{position:static}
+  .map{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media (max-width:900px){
+  :root{--toc:0px}
+  .toc{transform:translateX(-105%);width:290px;box-shadow:20px 0 60px rgba(0,0,0,.5)}
+  body.navopen .toc{transform:none}
+  .topbar{display:flex;position:sticky;top:0;z-index:40;align-items:center;gap:10px;padding:10px 14px;background:color-mix(in srgb,var(--bg) 88%,transparent);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+  .topbar button{border:1px solid var(--line2);background:var(--panel);border-radius:10px;width:40px;height:40px;font-size:18px}
+  .topbar b{font:700 15px var(--disp)}
+  .themebtn{top:10px;right:12px}
+  main{margin-left:0}
+  .hero{min-height:auto;padding-top:34px}
+  .grid2,.grid3,.v3d,.cons-grid{grid-template-columns:1fr}
+  .navshade{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:45}
+  body.navopen .navshade{display:block}
+}
+@media (max-width:560px){
+  body{font-size:15.5px}
+  .card{padding:16px}
+  .sec{padding-top:40px}
+  .sec-head{gap:12px}
+  .map{gap:10px}
+  .mnode{padding:10px 11px;min-height:0}
+  .mnode small{font-size:12px}
+  .tpanel{padding:12px;margin-left:-6px;margin-right:-6px;border-radius:16px}
+  .tasks{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .player .side{padding:14px}
+  .pl-text{min-height:0}
+  .opts{grid-template-columns:1fr}
+  .answer input{width:96px}
+  .cons{padding:12px}
+}
+
+</style>
+<script>try{if(localStorage.getItem('ng-geo:theme')==='"light"')document.documentElement.classList.add('light')}catch(e){}</script>
+</head>
+<body>
+<div class="topbar"><button type="button" class="navbtn" aria-label="Меню">☰</button><b>НГ · зачёт</b></div>
+<div class="navshade"></div>
+<button type="button" class="themebtn" aria-label="Тема">◐</button>
+
+<nav class="toc" aria-label="Оглавление">
+  <a class="brand" href="#top"><i>📐</i>Начерталка</a>
+  <div class="prog">Пройдено: <b class="prog-n">0</b> из <span class="prog-t">0</span><div class="bar"><i></i></div></div>
+  <h6>Старт</h6>
+  <a class="ti" href="#start"><span>0</span>Как пользоваться</a>
+  <a class="ti" href="#map"><span>🗺</span>Карта: что откуда</a>
+  <h6>Теория</h6>
+  <a class="ti" href="#proj"><span>1</span>Проецирование</a>
+  <a class="ti" href="#point"><span>2</span>Точка и эпюр Монжа</a>
+  <a class="ti" href="#line"><span>3</span>Положение прямой</a>
+  <a class="ti" href="#tri"><span>4</span>Метод прямоуг. треугольника</a>
+  <a class="ti" href="#rev"><span>5</span>Обратные задачи</a>
+  <a class="ti" href="#plane"><span>6</span>Плоскость (лекция 3)</a>
+  <h6>Практика</h6>
+  <a class="ti star" href="#hw"><span>★</span>Моё ДЗ (1-01…1-16)</a>
+  <a class="ti" href="#prac"><span>🎯</span>Нарешка</a>
+  <a class="ti" href="#exam"><span>⏱</span>Пробный зачёт</a>
+  <h6>Повторение</h6>
+  <a class="ti" href="#cheat"><span>📋</span>Шпаргалка</a>
+  <a class="ti" href="#self"><span>🃏</span>Самопроверка</a>
+</nav>
+
+<main id="top">
+
+<header class="hero">
+  <span class="tag">Начертательная геометрия · зачёт</span>
+  <h1>Прямые и метод треугольника — <span class="grad">понятно от первой линии до ответа</span></h1>
+  <p class="lead">Вся тема по шагам: <b>откуда берётся</b> каждая линия на чертеже и <b>почему</b>. Разбор всех вариантов ДЗ, много задач для нарешки с пошаговыми решениями, конструктор оформления и пробный зачёт.</p>
+  <div class="btns">
+    <a class="btn pri" href="#map">Начать с карты →</a>
+    <a class="btn" href="#hw">★ Мой вариант 1-03</a>
+    <a class="btn" href="#prac">🎯 Нарешка</a>
+    <a class="btn" href="#exam">⏱ Пробный зачёт</a>
+  </div>
+</header>
+
+<section class="sec" id="start">
+  <div class="sec-head"><div class="sec-no">00</div><div><h2>Как этим пользоваться</h2><div class="sec-sub">5 минут, чтобы потом всё шло легко</div></div></div>
+  <div class="idea exam"><b>Что будет на зачёте (с последней страницы практики):</b><br>
+    КР — <b>задача 1:</b> дан комплексный чертёж прямой → определить её положение и описать свойства;<br>
+    <b>задача 2:</b> метод прямоугольного треугольника;<br>
+    <b>РЗ</b> — тоже на метод прямоугольного треугольника.<br>
+    С собой: тетрадь-лекции, 2 листа в клетку, чертёжные принадлежности (линейка, циркуль, транспортир, карандаш).</div>
+  <div class="grid3">
+    <div class="card"><h4>📖 Теория</h4><p>Коротко и простыми словами. В розовых блоках «Почему так?» — откуда берётся правило. 3D-модели можно крутить пальцем.</p></div>
+    <div class="card"><h4>▶️ Разбор по шагам</h4><p>Жми «Дальше» (или <span class="kbd">→</span>) — на чертеже появляется следующая линия, а справа написано, откуда она и зачем.</p></div>
+    <div class="card"><h4>🧩 Оформление</h4><p>Собери «Дано» и «Алгоритм» из карточек (есть лишние!). Проверка покажет, что верно, что лишнее и почему.</p></div>
+  </div>
+  <h3>Язык цветов (везде одинаковый)</h3>
+  <div class="card legend">
+    <span><i style="background:var(--p1)"></i>горизонтальная проекция, П₁, «1»</span>
+    <span><i style="background:var(--p2)"></i>фронтальная проекция, П₂, «2»</span>
+    <span><i style="background:var(--p3)"></i>профильная проекция, П₃, «3»</span>
+    <span><i style="background:var(--dd)"></i>второй катет Δx, Δy, Δz</span>
+    <span><i style="background:var(--nv)"></i>натуральная величина (гипотенуза)</span>
+    <span><i style="background:var(--ang)"></i>угол наклона α, β, γ</span>
+    <span><i style="background:var(--aux)"></i>линии связи и построения</span>
+  </div>
+  <div class="idea">Фон чертежей — клетка 5 мм, как на листе. Условия с координатами можно перерисовывать к себе клетка в клетку и строить параллельно с разбором.</div>
+</section>
+
+<section class="sec" id="map">
+  <div class="sec-head"><div class="sec-no">🗺</div><div><h2>Карта темы: что откуда берётся</h2><div class="sec-sub">Нажми на блок — узнаешь, откуда он и что даёт дальше</div></div></div>
+  <div data-w="map"></div>
+</section>
+
+<section class="sec" id="proj">
+  <div class="sec-head"><div class="sec-no">01</div><div><h2>Проецирование</h2><div class="sec-sub">Лекция 1 · как трёхмерный предмет попадает на плоский лист</div></div></div>
+  <div class="card theory">
+    <p><b>Проекция</b> — это «тень» предмета на плоскости, построенная лучами. Нужны три вещи: предмет, проецирующие лучи и плоскость проекций.</p>
+  </div>
+  <div class="grid2">
+    <div class="card"><h4>💡 Центральное</h4><p>Все лучи выходят из одной точки <b>S</b> — центра проекций. Как лампочка: тень больше предмета и искажена.</p><p class="muted">Нужно для перспективы. Мерить по нему неудобно — в курсе не используем.</p></div>
+    <div class="card"><h4>☀️ Параллельное</h4><p>Все лучи параллельны (центр S «ушёл в бесконечность»). Как солнце.</p><p>Условия: задано направление S, и плоскость не параллельна этому направлению.</p></div>
+  </div>
+  <div class="card"><h4>Параллельное бывает двух видов</h4>
+    <ul class="clean"><li><b>Прямоугольное (ортогональное)</b> — лучи падают под <b>90°</b>. На нём построены <b>все</b> машиностроительные чертежи — дальше только оно.</li>
+    <li><b>Косоугольное</b> — угол ≠ 90° (так строят аксонометрию).</li></ul></div>
+  <h3>9 свойств, которые не ломаются при проецировании</h3>
+  <div class="card"><div class="tscroll"><table class="t">
+    <tr><th>#</th><th>Свойство</th><th>Простыми словами</th></tr>
+    <tr><td>1</td><td>Проекция точки — точка</td><td>Но одна проекция <b>не определяет</b> точку: на луче бесконечно много точек.</td></tr>
+    <tr><td>2</td><td>Проекция прямой — прямая (в общем случае)</td><td>Лучи через прямую образуют плоскость, она режет П по прямой.</td></tr>
+    <tr><td>3</td><td>Прямая может быть проекцией кривой</td><td>Если кривая лежит в плоскости, ⊥ плоскости проекций.</td></tr>
+    <tr><td>4</td><td>Прямая ∥ лучам → точка</td><td><b>Вырожденная проекция.</b> Отсюда «проецирующие» прямые.</td></tr>
+    <tr><td>5</td><td>Отрезок ∥ П → натуральная величина</td><td>Иначе проекция <b>короче</b>: |E₁F₁| = |EF|·cos(угла). Отсюда «прямые уровня» и весь метод треугольника.</td></tr>
+    <tr><td>6</td><td>Точка на прямой → проекция на проекции</td><td>K ∈ ML ⇒ K₁ ∈ M₁L₁.</td></tr>
+    <tr><td>7</td><td>Отношение отрезков сохраняется</td><td>Середина отрезка проецируется в середину проекции.</td></tr>
+    <tr><td>8</td><td>Пересекающиеся → пересекающиеся</td><td>Точка пересечения проекций — проекция точки пересечения.</td></tr>
+    <tr><td>9</td><td>Параллельные → параллельные</td><td>a ∥ b ⇒ a₁ ∥ b₁.</td></tr>
+  </table></div></div>
+  <div class="idea exam">Для зачёта главные — <b>4</b> и <b>5</b>. Из свойства 5 следует: если прямая не параллельна ни одной плоскости, её длина искажена <b>везде</b> — и нужен метод прямоугольного треугольника.</div>
+</section>
+
+<section class="sec" id="point">
+  <div class="sec-head"><div class="sec-no">02</div><div><h2>Точка и эпюр Монжа</h2><div class="sec-sub">Лекция 1 · три плоскости, три координаты, один чертёж</div></div></div>
+  <div class="grid2">
+    <div class="card theory"><h4>Угол комнаты</h4><ul class="clean">
+      <li><b class="c-p1">П₁</b> — горизонтальная плоскость (пол). Проекции с индексом ₁.</li>
+      <li><b class="c-p2">П₂</b> — фронтальная (стена перед нами). Индекс ₂.</li>
+      <li><b class="c-p3">П₃</b> — профильная (стена справа). Индекс ₃.</li>
+      <li>Линии стыка — оси <b>x, y, z</b>, точка стыка — <b>O</b>. Ось x смотрит <b>влево</b>.</li></ul>
+      <p class="muted">Две плоскости делят пространство на 4 четверти, три — на 8 октантов.</p></div>
+    <div class="card theory"><h4>Три координаты = три расстояния</h4><ul class="clean">
+      <li><b>x — широта</b>: расстояние до П₃;</li>
+      <li><b>y — глубина</b>: расстояние до П₂ (чем больше y, тем ближе к нам);</li>
+      <li><b>z — высота</b>: расстояние до П₁.</li></ul>
+      <div class="formula">A₁(x; y) &nbsp; A₂(x; z) &nbsp; A₃(y; z)</div>
+      <p>Каждая проекция <b>теряет</b> одну координату — ту, вдоль которой шёл луч.</p></div>
+  </div>
+  <h3>Потрогай: двигай точку и смотри на проекции</h3>
+  <div data-w="point"></div>
+  <div class="card"><h4>Откуда берётся эпюр (комплексный чертёж, КЧ)</h4>
+    <p>На листе нет трёх плоскостей. Поэтому <b>П₁ поворачивают вниз</b> вокруг оси x, а <b>П₃ — вправо</b> вокруг оси z, пока всё не ляжет в плоскость П₂. Ось y при этом «раздваивается»: уходит вниз вместе с П₁ и вправо вместе с П₃ — поэтому её пишут дважды (y и y′).</p>
+    <ul class="clean"><li><b>Самой точки на эпюре нет</b> — только её проекции.</li>
+      <li><b>Линии связи:</b> A₁A₂ ⊥ Ox (всегда на одной вертикали), A₂A₃ ⊥ Oz (на одной горизонтали).</li>
+      <li>По двум проекциям всегда можно построить третью.</li></ul></div>
+  <h3>Пример: строим A₃ по A₁ и A₂</h3>
+  <div data-w="ex-p3"></div>
+  <details class="why"><summary>Почему y переносят через линию 45°?</summary><div><p>На П₁ глубина y откладывается <b>вниз</b> от оси x, а на П₃ — <b>вправо</b> от оси z. Линия под 45° просто «поворачивает» отрезок y из вертикального положения в горизонтальное, сохраняя длину. Вместо неё можно перенести y циркулем — дугой с центром в O.</p></div></details>
+  <div class="card"><h4>Частные положения точки</h4><ul class="clean">
+    <li><b>Точка на оси</b> (например, B на оси z): две проекции на этой оси (B₂ ≡ B₃), третья — в начале координат (B₁ ≡ O). Строить начинают с B₂ и B₃.</li>
+    <li><b>Точка в плоскости проекций</b> (например, C в П₁): одна проекция совпадает с самой точкой (C ≡ C₁), две другие лежат на осях. Начинают с C₁.</li></ul></div>
+</section>
+
+<section class="sec" id="line">
+  <div class="sec-head"><div class="sec-no">03</div><div><h2>Положение прямой</h2><div class="sec-sub">Лекция 2 · это задача 1 на зачёте</div></div></div>
+  <div class="card theory"><p><b>Аксиома:</b> через две точки проходит единственная прямая. Поэтому проекции прямой = проекции двух её точек, соединённые <b>одноимённо</b> (A₁ с B₁, A₂ с B₂). Прямая на КЧ задаётся отрезком или сразу своими проекциями.</p></div>
+  <h3>Три группы прямых</h3>
+  <div class="card"><div class="tscroll"><table class="t">
+    <tr><th>Группа</th><th>Какие</th><th>Как узнать на КЧ</th><th>Где НВ</th></tr>
+    <tr><td><b>Общего положения</b><br><span class="muted">косо ко всем П</span></td><td>восходящая / нисходящая</td><td>Ни одна проекция не ∥ и не ⊥ оси x</td><td>Нигде → метод треугольника</td></tr>
+    <tr><td><b>Уровня</b><br><span class="muted">∥ одной П</span></td><td>горизонталь h (∥ П₁)<br>фронталь f (∥ П₂)<br>профильная p (∥ П₃)</td><td>h: A₂B₂ ∥ Ox<br>f: A₁B₁ ∥ Ox<br>p: обе проекции ⊥ Ox (одна линия связи)</td><td>h — на П₁<br>f — на П₂<br>p — на П₃</td></tr>
+    <tr><td><b>Проецирующие</b><br><span class="muted">⊥ одной П</span></td><td>горизонтально- (⊥ П₁)<br>фронтально- (⊥ П₂)<br>профильно-проецирующая (⊥ П₃)</td><td>Одна проекция — <b>точка</b>:<br>A₁≡B₁ / A₂≡B₂ / A₃≡B₃</td><td>На двух других плоскостях</td></tr>
+  </table></div></div>
+  <div class="idea">Фишка: <b>где проекция ∥ оси x — там прямая «спрятала» длину</b>, а натуральная величина живёт на <b>другой</b> проекции. У горизонтали A₂B₂ ∥ x, а НВ — A₁B₁.</div>
+  <h3>Лаборатория: выбери тип и покрути</h3>
+  <p class="muted">Слева — прямая в пространстве, справа — её эпюр. Кнопки «Спереди / Сверху / Слева» показывают, что каждая проекция — это просто вид с одной стороны.</p>
+  <div data-w="lab"></div>
+  <h3>Как определить тип за 5 секунд</h3>
+  <div class="card"><ol class="clean">
+    <li>Есть проекция-<b>точка</b>? → <b>проецирующая</b>. Той плоскости, где точка, она перпендикулярна.</li>
+    <li>Есть проекция <b>∥ оси x</b>? → <b>уровня</b>: A₂B₂ ∥ x — горизонталь (НВ на П₁); A₁B₁ ∥ x — фронталь (НВ на П₂). Обе ∥ x — профильно-проецирующая.</li>
+    <li>Обе проекции на <b>одной вертикали</b> (⊥ x)? → <b>профильная</b> (НВ на П₃).</li>
+    <li>Иначе → <b>общего положения</b>. Проекции наклонены в одну сторону — <b>восходящая</b>, в разные — <b>нисходящая</b>.</li>
+  </ol></div>
+  <details class="why"><summary>Почему «в одну сторону» — это восходящая?</summary><div><p>Наблюдатель стоит перед П₂. «Удаляться» — значит уменьшать y. Восходящая: y уменьшается, z растёт. На фронтальной проекции точка с большей z выше; на горизонтальной точка с меньшей y тоже выше (ближе к оси x). Значит, обе проекции поднимаются к одному и тому же концу — наклонены одинаково.</p></div></details>
+  <h3>Шаблон ответа на задачу 1</h3>
+  <div class="card"><p class="muted" style="margin-top:0">Пример для горизонтали. Для любого типа — то же самое: <b>название → признак на КЧ → свойства</b>.</p>
+    <div class="formula" style="white-space:normal">AB — горизонталь h (прямая уровня, ∥ П₁), т.к. A₂B₂ ∥ Ox.<br>Свойства: |A₁B₁| = |AB| (НВ на П₁); α = 0°; ∠(A₁B₁, Ox) = β; ∠(A₁B₁, Oy) = γ; A₃B₃ ∥ Oy′.</div>
+    <p>Свойства для каждого типа — в лаборатории выше и в <a href="#cheat">шпаргалке</a>. Тренируйся в <a href="#prac">тренажёре «Тип прямой»</a> — там нужно и узнать тип, и собрать свойства.</p></div>
+</section>
+
+<section class="sec" id="tri">
+  <div class="sec-head"><div class="sec-no">04</div><div><h2>Метод прямоугольного треугольника</h2><div class="sec-sub">Практика 2 · задача 2 на зачёте и РЗ</div></div></div>
+  <div class="def"><b>Правило (как в тетради):</b> для нахождения натуральной длины отрезка на КЧ строят прямоугольный треугольник: <b>I катет</b> — проекция отрезка на плоскость проекций, <b>II катет</b> — разность расстояний концов отрезка до этой плоскости. <b>Гипотенуза</b> — натуральная величина. <b>Угол между проекцией и гипотенузой</b> — угол наклона прямой к этой плоскости.</div>
+  <h3>Откуда он берётся — покрути</h3>
+  <div data-w="tri3d"></div>
+  <h3>Какой катет брать</h3>
+  <div class="card"><div class="tscroll"><table class="t">
+    <tr><th>Ищем угол с</th><th>I катет</th><th>II катет</th><th>Где взять II катет</th><th>Угол</th></tr>
+    <tr><td class="c-p1"><b>П₁</b></td><td>[A₁B₁]</td><td class="c-dd"><b>Δz</b> — разность высот</td><td>на фронтальной проекции (по вертикали)</td><td class="c-ang"><b>α</b></td></tr>
+    <tr><td class="c-p2"><b>П₂</b></td><td>[A₂B₂]</td><td class="c-dd"><b>Δy</b> — разность глубин</td><td>на горизонтальной проекции (по вертикали)</td><td class="c-ang"><b>β</b></td></tr>
+    <tr><td class="c-p3"><b>П₃</b></td><td>[A₃B₃]</td><td class="c-dd"><b>Δx</b> — разность широт</td><td>расстояние между линиями связи</td><td class="c-ang"><b>γ</b></td></tr>
+  </table></div></div>
+  <div class="idea good"><b>Как не перепутать:</b> Δ — это та координата, <b>которой нет у проекции</b>. A₁(x; y) — нет z → <b>Δz</b>. A₂(x; z) — нет y → <b>Δy</b>. A₃(y; z) — нет x → <b>Δx</b>.</div>
+  <h3>Пример по шагам (все три угла, как задача 1 с практики)</h3>
+  <div data-w="ex-tri"></div>
+  <h3>Частые ошибки</h3>
+  <div class="grid2">
+    <div class="idea err">Отложить Δ <b>вдоль</b> проекции, а не перпендикулярно.</div>
+    <div class="idea err">Мерить угол между Δ и гипотенузой. Угол наклона — <b>при проекции</b>.</div>
+    <div class="idea err">Для α взять Δy (или для β — Δz). Смотри таблицу: для П₁ всегда Δz.</div>
+    <div class="idea err">Строить треугольник для горизонтали/фронтали. Там НВ уже видна — второй катет равен 0.</div>
+  </div>
+  <h3>Проверь себя после решения</h3>
+  <div class="card"><ul class="clean">
+    <li>НВ <b>больше</b> любой проекции (у прямой общего положения).</li>
+    <li>Два треугольника для одного отрезка дают <b>одну и ту же</b> гипотенузу.</li>
+    <li><b>α + β ≤ 90°</b>; у профильной прямой α + β = 90° ровно.</li>
+    <li>Для любителей: sin²α + sin²β + sin²γ = 1.</li></ul></div>
+  <h3>Как оформить в тетради</h3>
+  <div class="card"><div class="formula" style="white-space:normal;line-height:1.8">
+    <b>Дано:</b> [AB] (A₁B₁, A₂B₂)<br>|AB| — ?&nbsp; α = ∠(AB, П₁) — ?&nbsp; β = ∠(AB, П₂) — ?<br>
+    <b>Алгоритм:</b><br>1) I катет — [A₁B₁]; II катет — Δz = z<sub>A</sub> − z<sub>B</sub>; |A₀B₁| = |AB|; α = ∠(A₁B₁, A₀B₁) = ∠(AB, П₁)<br>
+    2) I катет — [A₂B₂]; II катет — Δy = y<sub>A</sub> − y<sub>B</sub>; |A₀B₂| = |AB|; β = ∠(A₂B₂, A₀B₂) = ∠(AB, П₂)</div></div>
+</section>
+
+<section class="sec" id="rev">
+  <div class="sec-head"><div class="sec-no">05</div><div><h2>Обратные задачи: недостающая проекция</h2><div class="sec-sub">Задачи 3–4 с практики и 1-13…1-20 в ДЗ</div></div></div>
+  <div class="card theory"><p>Тот же треугольник, только наоборот: известны проекция и <b>угол</b> (или <b>НВ</b>) → строим треугольник → получаем <b>Δ</b> → откладываем Δ на линии связи неизвестной точки.</p></div>
+  <div class="grid2">
+    <div class="card"><h4>Тип 1 — простой</h4><p>Угол дан к той плоскости, на которой проекция есть <b>целиком</b> (α и дана A₁B₁; β и дана A₂B₂) или дана НВ.</p><p>Треугольник строим прямо на проекции → Δ → откладываем <b>вверх и вниз</b> от уровня известной точки.</p><p><b>Решений: 2.</b></p></div>
+    <div class="card"><h4>Тип 2 — с окружностью</h4><p>Угол дан к плоскости, где проекции <b>нет</b> (β, а дана A₁B₁; α, а дана A₂B₂).</p><p>Δ берём с данной проекции, по Δ и углу строим треугольник сбоку → узнаём длину недостающей проекции → дуга циркулем до линии связи.</p><p><b>Решений: 2, 1 или 0</b> — сколько точек пересечения.</p></div>
+  </div>
+  <details class="why"><summary>Почему в типе 1 всегда два решения?</summary><div><p>Треугольник даёт только <b>величину</b> Δ — насколько точка B выше (или ближе) точки A. Но не знак: B может быть и выше, и ниже на столько же. Оба отрезка имеют одну и ту же проекцию и один и тот же угол.</p></div></details>
+  <h3>Пример: по натуральной величине (задача 3 с практики)</h3>
+  <div data-w="rev-ex1"></div>
+  <h3>Пример: хитрый тип 2 (как 1-15)</h3>
+  <div data-w="rev-ex2"></div>
+</section>
+
+<section class="sec" id="plane">
+  <div class="sec-head"><div class="sec-no">06</div><div><h2>Плоскость</h2><div class="sec-sub">Лекция 3 · коротко, на случай вопроса</div></div></div>
+  <div class="grid2">
+    <div class="card theory"><h4>6 способов задать плоскость</h4><ol class="clean"><li>Три точки не на одной прямой — Ψ(A, B, C)</li><li>Прямая и точка вне её — Σ(A, l)</li><li>Две параллельные прямые — Λ(a ∥ b)</li><li>Две пересекающиеся прямые — Σ(c ∩ d)</li><li>Плоская фигура — Ψ(△ABC)</li><li>Следы — Θ(Θ₁, Θ₂)</li></ol><p class="muted">От любого способа можно перейти к любому другому.</p></div>
+    <div class="card theory"><h4>Следы</h4><p><b>След</b> — линия, по которой плоскость пересекает плоскость проекций: горизонтальный h₀ (с П₁), фронтальный f₀ (с П₂), профильный (с П₃).</p><p>Точка пересечения двух следов на оси — <b>точка схода следов</b>.</p><p class="muted">Горизонталь плоскости: h₁ ∥ h₀, h₂ ∥ x. Фронталь: f₂ ∥ f₀, f₁ ∥ x.</p></div>
+  </div>
+  <div class="card"><div class="tscroll"><table class="t">
+    <tr><th>Плоскость</th><th>Положение</th><th>Признак на КЧ</th><th>Натуральная величина</th></tr>
+    <tr><td><b>Общего положения</b></td><td>не ∥ и не ⊥ ни одной П</td><td>следы наклонены ко всем осям</td><td>нигде</td></tr>
+    <tr><td>Горизонтально-проецирующая</td><td>⊥ П₁</td><td>все горизонтальные проекции лежат на следе Σ₁; Σ₂ ⊥ Ox</td><td>—</td></tr>
+    <tr><td>Фронтально-проецирующая</td><td>⊥ П₂</td><td>все фронтальные проекции на Σ₂; Σ₁ ⊥ Ox</td><td>—</td></tr>
+    <tr><td>Профильно-проецирующая</td><td>⊥ П₃</td><td>Σ₁ ∥ Ox и Σ₂ ∥ Ox</td><td>—</td></tr>
+    <tr><td>Горизонтальная (уровня)</td><td>∥ П₁</td><td>фронтальный след ∥ Ox</td><td>на П₁</td></tr>
+    <tr><td>Фронтальная (уровня)</td><td>∥ П₂</td><td>горизонтальный след ∥ Ox</td><td>на П₂</td></tr>
+    <tr><td>Профильная (уровня)</td><td>∥ П₃</td><td>следы ⊥ Ox</td><td>на П₃</td></tr>
+  </table></div></div>
+  <div class="idea">Та же логика, что у прямых: первое слово в названии — плоскость проекций, с которой плоскость «связана». Проецирующая ⊥ ей (видна на ней линией), уровня ∥ ей (всё на ней в НВ).</div>
+</section>
+
+<section class="sec" id="hw">
+  <div class="sec-head"><div class="sec-no">★</div><div><h2>Моё ДЗ: разбор всех вариантов</h2><div class="sec-sub">Лист «Задачи 1-01…1-20» · твой вариант — 1-03</div></div></div>
+  <div class="card"><ul class="clean">
+    <li><b>1-01…1-12:</b> определить НВ отрезка AB и углы наклона к указанным плоскостям. Чертёж <b>безосный</b> — оси x нет, но она и не нужна: работаем только с разностями Δ.</li>
+    <li><b>1-13…1-20:</b> построить недостающую проекцию по углу наклона и сказать, сколько решений. На скрине видны 1-13…1-16, остальные обрезаны — они решаются теми же двумя способами из раздела <a href="#rev">«Обратные задачи»</a>.</li>
+    <li>Как пользоваться: открой задачу → перерисуй к себе → решай сам → листай разбор по шагам → собери оформление → впиши свои углы в «Мой ответ».</li></ul></div>
+  <div class="idea">На безосном чертеже «∥ оси x» значит просто «горизонтально», а «⊥ оси x» — «вертикально». Линии связи всегда вертикальны.</div>
+  <div data-w="hw"></div>
+</section>
+
+<section class="sec" id="prac">
+  <div class="sec-head"><div class="sec-no">🎯</div><div><h2>Нарешка</h2><div class="sec-sub">Реши сам на листе → проверь ответ → посмотри разбор по шагам</div></div></div>
+  <div class="tabs" data-w="prac-tabs"></div>
+  <div data-w="prac"></div>
+</section>
+
+<section class="sec" id="exam">
+  <div class="sec-head"><div class="sec-no">⏱</div><div><h2>Пробный зачёт</h2><div class="sec-sub">Как КР: задача 1 — положение прямой, задача 2 — метод прямоугольного треугольника</div></div></div>
+  <div data-w="exam"></div>
+</section>
+
+<section class="sec" id="cheat">
+  <div class="sec-head"><div class="sec-no">📋</div><div><h2>Шпаргалка</h2><div class="sec-sub">Вся тема на одном экране — прочитай перед зачётом</div></div></div>
+  <div data-w="cheat"></div>
+  <div class="grid2">
+    <div class="card"><h4>Порядок решения задачи на НВ</h4><ol class="clean"><li>Определи тип прямой.</li><li>Уровня/проецирующая → НВ и углы видны сразу.</li><li>Общего положения → треугольник: I катет — проекция на нужную П, II катет — Δ «отсутствующей» координаты.</li><li>Гипотенуза = НВ, угол при проекции = угол наклона.</li><li>Проверь: НВ > проекций, α + β ≤ 90°.</li></ol></div>
+    <div class="card"><h4>Словарик</h4><ul class="clean"><li><b>КЧ</b> — комплексный чертёж (эпюр Монжа).</li><li><b>НВ</b> — натуральная величина, настоящая длина.</li><li><b>Линия связи</b> — соединяет проекции одной точки.</li><li><b>α, β, γ</b> — углы наклона к П₁, П₂, П₃.</li><li><b>След прямой</b> — точка, где прямая протыкает П.</li><li><b>Безосный чертёж</b> — без оси x; работаем с разностями.</li></ul></div>
+  </div>
+</section>
+
+<section class="sec" id="self">
+  <div class="sec-head"><div class="sec-no">🃏</div><div><h2>Самопроверка</h2><div class="sec-sub">Ответь в голове, потом нажми на карточку</div></div></div>
+  <div data-w="flash"></div>
+  <div class="foot">Собрано по лекциям 1–3 и практике 2. Чертежи строятся кодом, решения считаются автоматически. Прогресс сохраняется в этом браузере.</div>
+</section>
+
+</main>
+<script>
+/* Движок чертежей: SVG-эпюр в миллиметрах + пошаговый плеер.
+   Экранные координаты: X вправо, Y вниз, 1 единица = 1 мм. */
+(function(){
+'use strict';
+const NG = window.NG = window.NG || {};
+const NS = 'http://www.w3.org/2000/svg';
+
+function sv(tag, attrs, parent){
+  const e = document.createElementNS(NS, tag);
+  if (attrs) for (const k in attrs) if (attrs[k] != null) e.setAttribute(k, attrs[k]);
+  if (parent) parent.appendChild(e);
+  return e;
+}
+NG.sv = sv;
+
+const G = NG.G = {
+  add:(a,b)=>[a[0]+b[0],a[1]+b[1]], sub:(a,b)=>[a[0]-b[0],a[1]-b[1]], mul:(a,k)=>[a[0]*k,a[1]*k],
+  len:a=>Math.hypot(a[0],a[1]), dist:(a,b)=>Math.hypot(a[0]-b[0],a[1]-b[1]),
+  norm:a=>{const l=Math.hypot(a[0],a[1])||1;return [a[0]/l,a[1]/l];},
+  perp:a=>[-a[1],a[0]], dot:(a,b)=>a[0]*b[0]+a[1]*b[1],
+  lerp:(a,b,t)=>[a[0]+(b[0]-a[0])*t,a[1]+(b[1]-a[1])*t],
+  dir:t=>[Math.cos(t),Math.sin(t)], at2:v=>Math.atan2(v[1],v[0])
+};
+
+/* число с десятичной запятой, без хвостовых нулей */
+NG.fmt = function(v, d){ if (d == null) d = 1; let s = (+v).toFixed(d); if (d>0) s = s.replace(/\.?0+$/, ''); if (s==='-0') s='0'; return s.replace('.', ','); };
+
+const WIDTH = {main:2.6, nv:2.9, thin:1.4, aux:1.3, link:1.05, axis:1.4, ext:1};
+
+/* ---------- габариты сцены ---------- */
+function bbox(els, pad){
+  let x0=Infinity,y0=Infinity,x1=-Infinity,y1=-Infinity;
+  const P=p=>{ if(!p) return; x0=Math.min(x0,p[0]);y0=Math.min(y0,p[1]);x1=Math.max(x1,p[0]);y1=Math.max(y1,p[1]); };
+  els.forEach(e=>{
+    if (e.nobb) return;
+    if (e.t==='seg'){P(e.a);P(e.b);}
+    else if (e.t==='dim'){
+      P(e.a);P(e.b);
+      if (e.n){
+        const v=G.norm(G.sub(e.b,e.a)), n=G.perp(v), m=G.lerp(e.a,e.b,.5), s=e.side||1;
+        const w=e.n.length*1.8+4;
+        if (Math.abs(n[0])>=.35) P([m[0]+n[0]*s*w, m[1]]); else P([m[0], m[1]+n[1]*s*6]);
+      }
+    }
+    else if (e.t==='pt'){P(e.p);}
+    else if (e.t==='txt'){
+      /* грубая оценка ширины подписи: ~1,8 мм на символ */
+      const w = (e.n||'').length*1.8, x = e.p[0] + (e.dp?e.dp[0]*0.3:0);
+      P([x,e.p[1]]);
+      if (e.anc==='start') P([x+w,e.p[1]]); else if (e.anc==='end') P([x-w,e.p[1]]); else { P([x-w/2,e.p[1]]); P([x+w/2,e.p[1]]); }
+    }
+    else if (e.t==='poly'){e.pts.forEach(P);}
+    else if (e.t==='ang'){P(e.v);}
+    else if (e.t==='arc'){ for(let i=0;i<=8;i++){ const t=e.t1+(e.t2-e.t1)*i/8; P(G.add(e.o,G.mul(G.dir(t),e.r))); } }
+  });
+  if (!isFinite(x0)) {x0=0;y0=0;x1=50;y1=50;}
+  let w=x1-x0, h=y1-y0;
+  const minW = 50, minH = 30;
+  if (w<minW){x0-=(minW-w)/2; w=minW;}
+  if (h<minH){y0-=(minH-h)/2; h=minH;}
+  return {x:x0-pad, y:y0-pad, w:w+2*pad, h:h+2*pad};
+}
+NG.bbox = bbox;
+
+/* ---------- рисование одного элемента ---------- */
+function drawEl(g, e, u){
+  const c = e.c || 'txt';
+  if (e.t==='seg'){
+    if (e.glow){
+      return sv('line',{x1:e.a[0],y1:e.a[1],x2:e.b[0],y2:e.b[1],class:'glow pulse s-'+c,'stroke-width':12*u},g);
+    }
+    const w = (WIDTH[e.w||'main']||2.4)*u;
+    const a = {x1:e.a[0],y1:e.a[1],x2:e.b[0],y2:e.b[1],class:'s-'+c,'stroke-width':w,'stroke-linecap':'round'};
+    if (e.w==='aux' || e.dash) a['stroke-dasharray'] = (7*u)+' '+(4.5*u);
+    if (e.w==='ext') a['stroke-dasharray'] = (2*u)+' '+(3.5*u);
+    if (e.w==='link') a['stroke-opacity'] = .75;
+    return sv('line',a,g);
+  }
+  if (e.t==='poly'){
+    return sv('polygon',{points:e.pts.map(p=>p.join(',')).join(' '),class:'f-'+c,'fill-opacity':e.op==null?.1:e.op},g);
+  }
+  if (e.t==='pt'){
+    const gg = sv('g',{},g);
+    const r = (e.r||3.3)*u;
+    sv('circle',{cx:e.p[0],cy:e.p[1],r:r,class:(e.hollow?'s-':'f-')+c+(e.hollow?'':' s-'+c),fill:e.hollow?'var(--figbg)':null,'stroke-width':1.6*u},gg);
+    if (e.n) label(gg, e.p, e.n, c, e.lp, u, e.size);
+    return gg;
+  }
+  if (e.t==='txt'){
+    const fs=(e.size||13)*u;
+    const dp = e.dp||[0,0];
+    const t = sv('text',{x:e.p[0]+dp[0]*u,y:e.p[1]+dp[1]*u,'font-size':fs,'text-anchor':e.anc||'middle',class:'ep-text '+(e.val?'ep-val ':'')+'f-'+c,'stroke-width':3.2*u},g);
+    t.textContent = e.n;
+    return t;
+  }
+  if (e.t==='ang'){
+    const gg = sv('g',{},g);
+    const va=G.sub(e.a,e.v), vb=G.sub(e.b,e.v);
+    const t1=G.at2(va); let d=G.at2(vb)-t1;
+    while(d>Math.PI) d-=2*Math.PI; while(d<=-Math.PI) d+=2*Math.PI;
+    const r = e.r || Math.max(5, Math.min(10, 0.38*Math.min(G.len(va),G.len(vb))));
+    const p1=G.add(e.v,G.mul(G.dir(t1),r)), p2=G.add(e.v,G.mul(G.dir(t1+d),r));
+    const sw = d>0?1:0;
+    sv('path',{d:`M${e.v[0]},${e.v[1]} L${p1[0]},${p1[1]} A${r},${r} 0 0 ${sw} ${p2[0]},${p2[1]} Z`,class:'f-'+c,'fill-opacity':.16},gg);
+    sv('path',{d:`M${p1[0]},${p1[1]} A${r},${r} 0 0 ${sw} ${p2[0]},${p2[1]}`,class:'s-'+c,fill:'none','stroke-width':2*u},gg);
+    if (e.n){
+      const bis = G.dir(t1+d/2);
+      const lp = G.add(e.v,G.mul(bis,r+9*u+2));
+      const t = sv('text',{x:lp[0],y:lp[1]+4.5*u,'font-size':13*u,'text-anchor':'middle',class:'ep-text f-'+c,'stroke-width':3.2*u},gg);
+      t.textContent=e.n;
+    }
+    return gg;
+  }
+  if (e.t==='rt'){
+    const s = e.s2 || Math.max(2.4, 8*u);
+    const ua=G.norm(G.sub(e.a,e.v)), ub=G.norm(G.sub(e.b,e.v));
+    const p1=G.add(e.v,G.mul(ua,s)), p3=G.add(e.v,G.mul(ub,s)), p2=G.add(p1,G.mul(ub,s));
+    return sv('polyline',{points:[p1,p2,p3].map(p=>p.join(',')).join(' '),fill:'none',class:'s-'+c,'stroke-width':1.3*u},g);
+  }
+  if (e.t==='dim'){
+    const gg = sv('g',{},g);
+    const v=G.norm(G.sub(e.b,e.a)), n=G.perp(v);
+    const tk=5*u;
+    sv('line',{x1:e.a[0],y1:e.a[1],x2:e.b[0],y2:e.b[1],class:'s-'+c,'stroke-width':2.2*u},gg);
+    [e.a,e.b].forEach(p=>sv('line',{x1:p[0]-n[0]*tk,y1:p[1]-n[1]*tk,x2:p[0]+n[0]*tk,y2:p[1]+n[1]*tk,class:'s-'+c,'stroke-width':2*u},gg));
+    if (e.n){
+      const side = e.side||1;
+      const m=G.lerp(e.a,e.b,.5);
+      const off = e.lo || 11;
+      const lp=G.add(m,G.mul(n,side*off*u));
+      const anc = Math.abs(n[0])<.35?'middle':((n[0]*side)>0?'start':'end');
+      const t = sv('text',{x:lp[0],y:lp[1]+4.5*u,'font-size':(e.size||13)*u,'text-anchor':anc,class:'ep-text f-'+c,'stroke-width':3.2*u},gg);
+      t.textContent=e.n;
+    }
+    return gg;
+  }
+  if (e.t==='arc'){
+    const p1=G.add(e.o,G.mul(G.dir(e.t1),e.r)), p2=G.add(e.o,G.mul(G.dir(e.t2),e.r));
+    const d=e.t2-e.t1;
+    return sv('path',{d:`M${p1[0]},${p1[1]} A${e.r},${e.r} 0 ${Math.abs(d)>Math.PI?1:0} ${d>0?1:0} ${p2[0]},${p2[1]}`,fill:'none',class:'s-'+c,'stroke-width':1.3*u,'stroke-dasharray':(5*u)+' '+(3.5*u)},g);
+  }
+}
+
+function label(g, p, text, c, lp, u, size){
+  const d = lp ? G.norm(lp) : [-.7,-.7];
+  const fs = (size||14)*u;
+  const q = G.add(p, G.mul(d, 11*u));
+  let anc='middle';
+  if (d[0]<-.3) anc='end'; else if (d[0]>.3) anc='start';
+  let dy = fs*.36;
+  if (d[1]>.45) dy = fs*.85; else if (d[1]<-.45) dy = 0;
+  const t = sv('text',{x:q[0],y:q[1]+dy,'font-size':fs,'text-anchor':anc,class:'ep-text f-'+c,'stroke-width':3.4*u},g);
+  t.textContent = text;
+}
+
+/* ---------- фигура (эпюр) ---------- */
+NG.Fig = function(host, opts){
+  const els = opts.els;
+  const wrap = document.createElement('div');
+  wrap.className = 'fig' + (opts.cls?' '+opts.cls:'');
+  host.appendChild(wrap);
+  if (opts.cap){ const c=document.createElement('div'); c.className='figcap'; c.textContent=opts.cap; wrap.appendChild(c); }
+  const svg = sv('svg',{xmlns:NS, preserveAspectRatio:'xMidYMid meet', role:'img'}, wrap);
+  const bb = bbox(els, opts.pad==null?11:opts.pad);
+  svg.setAttribute('viewBox', `${bb.x} ${bb.y} ${bb.w} ${bb.h}`);
+  const self = {svg, wrap, step: opts.step==null?Infinity:opts.step, nodes:[]};
+  let lastW = 0;
+
+  function render(animate){
+    const cw = svg.clientWidth || wrap.clientWidth || opts.w || 600;
+    const maxH = opts.maxH || window.innerHeight*0.72;
+    const sc = Math.max(0.3, Math.min(cw/bb.w, maxH/bb.h));
+    const u = (opts.u || 1/sc) * (opts.k || 1);
+    lastW = cw;
+    while (svg.firstChild) svg.removeChild(svg.firstChild);
+    if (opts.grid !== false){
+      const defs = sv('defs',{},svg);
+      const id = 'gp'+Math.random().toString(36).slice(2,8);
+      const pat = sv('pattern',{id, width:5, height:5, patternUnits:'userSpaceOnUse', x:0, y:0},defs);
+      sv('path',{d:'M5 0 L0 0 0 5',fill:'none',stroke:'var(--gridc)','stroke-width':u},pat);
+      const id2 = id+'b';
+      const pat2 = sv('pattern',{id:id2, width:10, height:10, patternUnits:'userSpaceOnUse', x:0, y:0},defs);
+      sv('path',{d:'M10 0 L0 0 0 10',fill:'none',stroke:'var(--gridc2)','stroke-width':u},pat2);
+      sv('rect',{x:bb.x,y:bb.y,width:bb.w,height:bb.h,fill:`url(#${id})`},svg);
+      sv('rect',{x:bb.x,y:bb.y,width:bb.w,height:bb.h,fill:`url(#${id2})`},svg);
+    }
+    const layer = sv('g',{},svg);
+    self.nodes = els.map(e=>drawEl(layer, e, u));
+    apply(animate);
+  }
+
+  function apply(animate){
+    const s = self.step;
+    els.forEach((e,i)=>{
+      const n = self.nodes[i]; if (!n) return;
+      const es = e.s||0;
+      let vis = es <= s;
+      if (e.hl) vis = es === s;
+      if (e.until!=null && s > e.until) vis = false;
+      n.style.display = vis ? '' : 'none';
+      n.classList.remove('el-new','el-old');
+      if (vis && s!==Infinity && es===s && es>0 && !e.glow){
+        n.classList.add('el-new');
+        if (animate && e.t==='seg' && !e.glow && !e.noanim) grow(n, e);
+      }
+    });
+  }
+
+  function grow(n, e){
+    const t0 = performance.now(), D = 520;
+    n.setAttribute('x2', e.a[0]); n.setAttribute('y2', e.a[1]);
+    function f(t){
+      const k = Math.min(1,Math.max(0,(t-t0)/D)), q = 1-Math.pow(1-k,3);
+      n.setAttribute('x2', e.a[0]+(e.b[0]-e.a[0])*q);
+      n.setAttribute('y2', e.a[1]+(e.b[1]-e.a[1])*q);
+      if (k<1) requestAnimationFrame(f);
+    }
+    requestAnimationFrame(f);
+  }
+
+  self.setStep = function(s, animate){ self.step = s; apply(animate); };
+  self.refresh = function(){ if (opts.u) return; const w = svg.clientWidth||0; if (w && Math.abs(w - lastW) > 2) render(false); };
+  render(false);
+  requestAnimationFrame(()=>self.refresh());
+  if (window.ResizeObserver && !opts.u){ const ro = new ResizeObserver(()=>self.refresh()); ro.observe(wrap); }
+  return self;
+};
+
+/* ---------- пошаговый плеер ---------- */
+NG.players = [];
+NG.Player = function(host, steps, opts){
+  opts = opts || {};
+  const els = [];
+  steps.forEach((st,i)=>{
+    (st.els||[]).forEach(e=>{ e.s = i; if (e.glow) e.hl = true; els.push(e); });
+    (st.hl||[]).forEach(e=>{ e.s = i; e.hl = true; els.push(e); });
+  });
+  const root = document.createElement('div'); root.className='player'; root.tabIndex = -1;
+  host.appendChild(root);
+  const figHost = document.createElement('div'); root.appendChild(figHost);
+  const fig = NG.Fig(figHost, {els, step:0, cap:opts.cap});
+  const side = document.createElement('div'); side.className='side'; root.appendChild(side);
+  side.innerHTML = `<div class="pl-count"><span class="cnt"></span><button class="btn sm allb" type="button">всё решение ⏭</button></div>
+    <div class="pl-title"></div><div class="pl-text"></div>
+    <div class="pl-ctrl"><button class="btn prev" type="button" aria-label="Назад">←</button><button class="btn pri next" type="button">Дальше →</button><button class="btn sm rst" type="button" aria-label="Сначала">⟲</button></div>
+    <div class="dots"></div><div class="pl-hint">Можно листать стрелками <span class="kbd">←</span> <span class="kbd">→</span> на клавиатуре</div>`;
+  const $ = s=>side.querySelector(s);
+  const dots = $('.dots');
+  steps.forEach((st,i)=>{ const d=document.createElement('i'); d.title=st.title.replace(/<[^>]+>/g,''); d.onclick=()=>go(i,true); dots.appendChild(d); });
+  let cur = 0;
+  function go(i, anim){
+    cur = Math.max(0, Math.min(steps.length-1, i));
+    const st = steps[cur];
+    fig.setStep(cur, anim);
+    $('.cnt').textContent = `Шаг ${cur+1} / ${steps.length}`;
+    $('.pl-title').innerHTML = st.title;
+    $('.pl-text').innerHTML = st.html || '';
+    $('.prev').disabled = cur===0;
+    const nx = $('.next');
+    nx.disabled = cur===steps.length-1;
+    nx.textContent = cur===steps.length-1 ? 'Готово ✓' : 'Дальше →';
+    [...dots.children].forEach((d,j)=>{ d.className = j<cur?'on':(j===cur?'cur':''); });
+    if (opts.onStep) opts.onStep(cur, steps.length);
+  }
+  $('.prev').onclick=()=>go(cur-1,true);
+  $('.next').onclick=()=>go(cur+1,true);
+  $('.rst').onclick=()=>go(0,false);
+  $('.allb').onclick=()=>go(steps.length-1,false);
+  const api = {root, go, next:()=>go(cur+1,true), prev:()=>go(cur-1,true), get cur(){return cur;}, fig};
+  const activate = ()=>{ NG.activePlayer = api; };
+  root.addEventListener('pointerdown', activate);
+  root.addEventListener('focusin', activate);
+  NG.players.push(api);
+  go(0,false);
+  return api;
+};
+
+function inView(el){ const r = el.getBoundingClientRect(); return r.bottom>80 && r.top < window.innerHeight-80; }
+document.addEventListener('keydown', e=>{
+  const t = e.target;
+  if (t && (t.tagName==='INPUT'||t.tagName==='TEXTAREA'||t.isContentEditable)) return;
+  if (e.key!=='ArrowRight' && e.key!=='ArrowLeft') return;
+  let p = NG.activePlayer;
+  if (!p || !document.body.contains(p.root) || !inView(p.root)){
+    p = NG.players.filter(x=>document.body.contains(x.root)).find(x=>inView(x.root));
+  }
+  if (!p) return;
+  e.preventDefault();
+  if (e.key==='ArrowRight') p.next(); else p.prev();
+});
+
+})();
+
+</script>
+<script>
+/* Решатель: по координатам отрезка строит пошаговое решение (элементы чертежа + объяснения)
+   и набор карточек для конструктора «Дано / Алгоритм». */
+(function(){
+'use strict';
+const NG = window.NG, G = NG.G, fmt = NG.fmt;
+const SUB = ['₀','₁','₂','₃'];
+const DEG = 180/Math.PI;
+const PR = {1:P=>[-P.x,P.y], 2:P=>[-P.x,-P.z], 3:P=>[P.y,-P.z]};
+const COL = {1:'p1',2:'p2',3:'p3'};
+const DC = {1:'z',2:'y',3:'x'};
+const ANG = {1:'α',2:'β',3:'γ'};
+const PL = {1:'П₁',2:'П₂',3:'П₃'};
+const PLN = {1:'горизонтальной',2:'фронтальной',3:'профильной'};
+const DWORD = {z:'высот (расстояний до П₁)', y:'глубин (расстояний до П₂)', x:'широт (расстояний до П₃)'};
+const nk = (n,k)=> n + SUB[k];
+const b = (cls, s)=> `<b class="c-${cls}">${s}</b>`;
+const sub = s=> `<sub>${s}</sub>`;
+NG.K = {SUB, PR, COL, DC, ANG, PL, PLN, DWORD, DEG, nk, b, sub};
+NG.nk = nk;
+
+/* ---------------- тип прямой ---------------- */
+NG.classify = function(A,B){
+  const e=0.35, sx=Math.abs(A.x-B.x)<e, sy=Math.abs(A.y-B.y)<e, sz=Math.abs(A.z-B.z)<e;
+  if (sx&&sy) return 'hp'; if (sx&&sz) return 'fp'; if (sy&&sz) return 'pp';
+  if (sz) return 'h'; if (sy) return 'f'; if (sx) return 'p';
+  return ((A.y-B.y)*(A.z-B.z) < 0) ? 'ga' : 'gd';
+};
+
+/* ---------------- величины ---------------- */
+NG.measure = function(A,B){
+  const dx=Math.abs(A.x-B.x), dy=Math.abs(A.y-B.y), dz=Math.abs(A.z-B.z);
+  const NV=Math.hypot(dx,dy,dz), L1=Math.hypot(dx,dy), L2=Math.hypot(dx,dz), L3=Math.hypot(dy,dz);
+  const a=Math.atan2(dz,L1)*DEG, bb=Math.atan2(dy,L2)*DEG, g=Math.atan2(dx,L3)*DEG;
+  return {dx,dy,dz,NV,L1,L2,L3,a,b:bb,g, L:{1:L1,2:L2,3:L3}, D:{1:dz,2:dy,3:dx}, ang:{1:a,2:bb,3:g}};
+};
+
+/* ---------------- вспомогательное ---------------- */
+function awayDir(p, others){
+  let d=[0,0];
+  others.forEach(o=>{ const v=G.sub(p,o), l=G.len(v); if (l>0.4) d=G.add(d,G.mul(v,1/l)); });
+  if (G.len(d)<0.25) d=[-1,-0.5];
+  return G.norm(d);
+}
+function mergePts(list){
+  const out=[];
+  list.forEach(q=>{
+    const m = out.find(o=>G.dist(o.p,q.p)<0.6);
+    if (m){ m.n += '≡'+q.n; m.others = m.others.concat(q.others); }
+    else out.push({p:q.p, n:q.n, c:q.c, others:q.others.slice()});
+  });
+  return out.map(o=>({t:'pt', p:o.p, n:o.n, c:o.c, lp: awayDir(o.p, o.others.filter(x=>G.dist(x,o.p)>0.6))}));
+}
+function chooseN(u, k){
+  let n = G.perp(u);
+  const flip=()=>{ n=[-n[0],-n[1]]; };
+  if (k===1){ if (Math.abs(n[1])>0.3){ if (n[1]<0) flip(); } else if (n[0]<0) flip(); }
+  else if (k===2){ if (Math.abs(n[1])>0.3){ if (n[1]>0) flip(); } else if (n[0]>0) flip(); }
+  else { if (Math.abs(n[0])>0.3){ if (n[0]<0) flip(); } else if (n[1]>0) flip(); }
+  return n;
+}
+function outText(mid, centroid, text, c){
+  const o = G.norm(G.sub(mid, centroid));
+  return {t:'txt', p:mid, dp:[o[0]*16, o[1]*16+4], n:text, c, val:true, anc: o[0]<-.3?'end':(o[0]>.3?'start':'middle'), size:12.5};
+}
+function sideFor(a,b2,out){ const n=G.perp(G.norm(G.sub(b2,a))); return G.dot(n,out)>=0?1:-1; }
+
+/* оси */
+function axesEls(pts3d, show3){
+  const els=[];
+  const xs = pts3d.map(P=>-P.x), ys=pts3d.map(P=>P.y), zs=pts3d.map(P=>P.z);
+  const Xmin = Math.min(...xs) - 12;
+  const ymax = Math.max(...ys, 10), zmax = Math.max(...zs, 10);
+  const right = show3 ? ymax + 14 : 10;
+  els.push({t:'seg', a:[Xmin,0], b:[right,0], c:'axis', w:'axis'});
+  els.push({t:'txt', p:[Xmin,0], dp:[-5,5], n:'x', c:'axis', anc:'end', size:15});
+  if (show3){
+    els.push({t:'seg', a:[0,-(zmax+14)], b:[0,ymax+14], c:'axis', w:'axis'});
+    els.push({t:'txt', p:[0,-(zmax+14)], dp:[-6,6], n:'z', c:'axis', anc:'end', size:15});
+    els.push({t:'txt', p:[0,ymax+14], dp:[-7,4], n:'y', c:'axis', anc:'end', size:15});
+    els.push({t:'txt', p:[right,0], dp:[2,-6], n:'y′', c:'axis', anc:'end', size:15});
+    els.push({t:'seg', a:[0,0], b:[ymax+10,ymax+10], c:'link', w:'link'});
+    els.push({t:'txt', p:[0,0], dp:[-5,-5], n:'O', c:'axis', anc:'end', size:13});
+  }
+  return els;
+}
+
+/* базовый чертёж условия */
+function baseScene(prob){
+  const nm = prob.names || ['A','B'];
+  const {A,B} = prob;
+  const given = prob.given || ['A1','B1','A2','B2'];
+  const has = s=>given.includes(s);
+  const S = {a1:PR[1](A), b1:PR[1](B), a2:PR[2](A), b2:PR[2](B), a3:PR[3](A), b3:PR[3](B)};
+  const els = [];
+  if (prob.axes) els.push(...axesEls([A,B], prob.show3));
+  if (has('A1')&&has('A2')) els.push({t:'seg',a:S.a1,b:S.a2,c:'link',w:'link'});
+  if (has('B1')&&has('B2')) els.push({t:'seg',a:S.b1,b:S.b2,c:'link',w:'link'});
+  (prob.links||[]).forEach(L=>{ const X=L.p==='A'?S.a1[0]:S.b1[0]; els.push({t:'seg',a:[X,L.y0],b:[X,L.y1],c:'link',w:'link'}); });
+  if (has('A1')&&has('B1') && G.dist(S.a1,S.b1)>0.5) els.push({t:'seg',a:S.a1,b:S.b1,c:'p1'});
+  if (has('A2')&&has('B2') && G.dist(S.a2,S.b2)>0.5) els.push({t:'seg',a:S.a2,b:S.b2,c:'p2'});
+  const L = [];
+  const add=(key,p,n,c,oth)=>{ if (has(key)) L.push({p,n,c,others:oth}); };
+  add('A2',S.a2,nk(nm[0],2),'p2',[S.b2,S.a1]);
+  add('B2',S.b2,nk(nm[1],2),'p2',[S.a2,S.b1]);
+  add('A1',S.a1,nk(nm[0],1),'p1',[S.b1,S.a2]);
+  add('B1',S.b1,nk(nm[1],1),'p1',[S.a1,S.b2]);
+  const pts = mergePts(L);
+  if (prob.lp) pts.forEach(p=>{ const k = Object.keys(prob.lp).find(k=>p.n.indexOf(k)===0); if (k) p.lp = prob.lp[k]; });
+  els.push(...pts);
+  return {els, S, nm, given};
+}
+
+/* где брать Δ: элементы-подсказки */
+function measureEls(k, S, d, label, yPos){
+  const els=[];
+  if (k===3){
+    const below = yPos!=null;
+    const y = below ? yPos : Math.min(S.a2[1], S.b2[1], S.a1[1], S.b1[1]) - 9;
+    const fa = below ? S.a1 : S.a2, fb = below ? S.b1 : S.b2, ext = below ? 3 : -3;
+    els.push({t:'seg',a:fa,b:[fa[0],y+ext],c:'aux',w:'ext'});
+    els.push({t:'seg',a:fb,b:[fb[0],y+ext],c:'aux',w:'ext'});
+    const a=[S.a2[0],y], b2=[S.b2[0],y];
+    els.push({t:'dim',a,b:b2,c:'dd',n:label,side:sideFor(a,b2,[0,below?1:-1])});
+    return els;
+  }
+  const p = k===1 ? S.a2 : S.a1, q = k===1 ? S.b2 : S.b1;
+  if (Math.abs(p[0]-q[0]) < 0.6){
+    els.push({t:'seg',a:p,b:q,c:'dd',glow:true});
+    const off = k===1 ? 7 : -7;
+    const a=[p[0]+off,p[1]], b2=[q[0]+off,q[1]];
+    els.push({t:'dim',a,b:b2,c:'dd',n:label,side:sideFor(a,b2,[off,0])});
+    return els;
+  }
+  let base;
+  if (k===1){ base = p[1]>q[1]?p:q; } else { base = p[1]<q[1]?p:q; }
+  const oth = base===p?q:p;
+  const sg = Math.sign(oth[0]-base[0]) || 1;
+  const foot=[oth[0], base[1]];
+  els.push({t:'seg',a:base,b:[foot[0]+sg*5,foot[1]],c:'aux',w:'aux'});
+  const a=[foot[0]+sg*3.5, foot[1]], b2=[oth[0]+sg*3.5, oth[1]];
+  els.push({t:'dim',a,b:b2,c:'dd',n:label,side:sideFor(a,b2,[sg,0])});
+  return els;
+}
+
+/* прямоугольный треугольник на проекции k */
+function triangleEls(k, pa, pb, d, NV, angVal, nm){
+  const u = G.norm(G.sub(pb,pa));
+  const n = chooseN(u,k);
+  const a0 = G.add(pa, G.mul(n,d));
+  const A0 = nm[0]+'₀';
+  const cen = [(pa[0]+pb[0]+a0[0])/3,(pa[1]+pb[1]+a0[1])/3];
+  const s3 = [
+    {t:'seg',a:pa,b:G.add(pa,G.mul(n,d+6)),c:'aux',w:'aux'},
+    {t:'rt',v:pa,a:pb,b:a0,c:'aux'},
+    {t:'seg',a:pa,b:a0,c:'dd',w:'main'},
+    {t:'pt',p:a0,n:A0,c:'nv',lp:awayDir(a0,[pa,pb])}
+  ];
+  const s4 = [
+    {t:'poly',pts:[pa,pb,a0],c:'nv',op:.09},
+    {t:'seg',a:a0,b:pb,c:'nv',w:'nv'},
+    outText(G.lerp(a0,pb,.5), cen, '|AB| ≈ '+fmt(NV), 'nv')
+  ];
+  const s5 = [{t:'ang',v:pb,a:pa,b:a0,c:'ang',n:ANG[k]+' ≈ '+fmt(angVal,0)+'°'}];
+  return {s3,s4,s5,a0,A0};
+}
+
+NG.U = {awayDir, mergePts, chooseN, outText, sideFor, axesEls, baseScene, measureEls, triangleEls};
+})();
+
+</script>
+<script>
+/* Типы прямых: признаки на КЧ, свойства (верные и ложные — для тренажёра). */
+(function(){
+'use strict';
+const NG = window.NG;
+NG.TYPES = {
+  ga:{name:'Общего положения (восходящая)', short:'общего положения', icon:'↗',
+    sign:'Ни одна проекция не параллельна и не перпендикулярна оси x. Проекции наклонены <b>в одну сторону</b>.',
+    nv:'Нигде — только методом прямоугольного треугольника',
+    props:['Ни одна проекция не ∥ и не ⊥ оси x','Все проекции короче отрезка: |A₁B₁|, |A₂B₂|, |A₃B₃| < |AB|','НВ и углы α, β, γ — только методом прямоугольного треугольника','0° < α, β, γ < 90°','Восходящая: удаляясь от наблюдателя, поднимается'],
+    fprops:['|A₁B₁| = |AB|','A₂B₂ ∥ Ox','α = 0°','Одна из проекций — точка','Нисходящая: удаляясь, опускается']},
+  gd:{name:'Общего положения (нисходящая)', short:'общего положения', icon:'↘',
+    sign:'Ни одна проекция не параллельна и не перпендикулярна оси x. Проекции наклонены <b>в разные стороны</b>.',
+    nv:'Нигде — только методом прямоугольного треугольника',
+    props:['Ни одна проекция не ∥ и не ⊥ оси x','Все проекции короче отрезка: |A₁B₁|, |A₂B₂|, |A₃B₃| < |AB|','НВ и углы α, β, γ — только методом прямоугольного треугольника','0° < α, β, γ < 90°','Нисходящая: удаляясь от наблюдателя, опускается'],
+    fprops:['|A₂B₂| = |AB|','A₁B₁ ∥ Ox','β = 0°','Одна из проекций — точка','Восходящая: удаляясь, поднимается']},
+  h:{name:'Горизонталь h (∥ П₁)', short:'горизонталь', icon:'h',
+    sign:'Фронтальная проекция <b>A₂B₂ ∥ Ox</b> (все точки на одной высоте z).',
+    nv:'На П₁: |A₁B₁| = |AB|',
+    props:['A₂B₂ ∥ Ox (z_A = z_B)','A₃B₃ ∥ Oy′','|A₁B₁| = |AB| — НВ на П₁','α = 0° (прямая ∥ П₁)','∠(A₁B₁, Ox) = β — угол с П₂','∠(A₁B₁, Oy) = γ — угол с П₃'],
+    fprops:['|A₂B₂| = |AB|','A₁B₁ ∥ Ox','β = 0°','A₁ ≡ B₁ (точка)','Для НВ нужен метод прямоугольного треугольника']},
+  f:{name:'Фронталь f (∥ П₂)', short:'фронталь', icon:'f',
+    sign:'Горизонтальная проекция <b>A₁B₁ ∥ Ox</b> (все точки на одной глубине y).',
+    nv:'На П₂: |A₂B₂| = |AB|',
+    props:['A₁B₁ ∥ Ox (y_A = y_B)','A₃B₃ ∥ Oz','|A₂B₂| = |AB| — НВ на П₂','β = 0° (прямая ∥ П₂)','∠(A₂B₂, Ox) = α — угол с П₁','∠(A₂B₂, Oz) = γ — угол с П₃'],
+    fprops:['|A₁B₁| = |AB|','A₂B₂ ∥ Ox','α = 0°','A₂ ≡ B₂ (точка)','Для НВ нужен метод прямоугольного треугольника']},
+  p:{name:'Профильная прямая p (∥ П₃)', short:'профильная прямая', icon:'p',
+    sign:'A₁B₁ и A₂B₂ <b>⊥ Ox</b> — лежат на одной линии связи (x_A = x_B).',
+    nv:'На П₃: |A₃B₃| = |AB| (или методом треугольника)',
+    props:['A₁B₁ ⊥ Ox и A₂B₂ ⊥ Ox — на одной линии связи (x_A = x_B)','|A₃B₃| = |AB| — НВ на П₃','γ = 0° (прямая ∥ П₃)','∠(A₃B₃, Oy′) = α, ∠(A₃B₃, Oz) = β','α + β = 90°','Задаётся отрезком (точками A и B), а не просто двумя линиями'],
+    fprops:['|A₁B₁| = |AB|','|A₂B₂| = |AB|','γ = 90°','A₁ ≡ B₁ (точка)','A₁B₁ ∥ Ox']},
+  hp:{name:'Горизонтально-проецирующая (⊥ П₁)', short:'горизонтально-проецирующая', icon:'⊥₁',
+    sign:'Горизонтальная проекция — <b>точка</b> A₁ ≡ B₁; фронтальная ⊥ Ox.',
+    nv:'На П₂ и П₃: |A₂B₂| = |A₃B₃| = |AB|',
+    props:['A₁ ≡ B₁ — точка (вырожденная проекция, след прямой)','A₂B₂ ⊥ Ox, A₃B₃ ⊥ Oy′','|A₂B₂| = |A₃B₃| = |AB|','α = 90°, β = γ = 0°','Прямая ∥ П₂ и ∥ П₃ одновременно'],
+    fprops:['A₂ ≡ B₂','|A₁B₁| = |AB|','α = 0°','A₂B₂ ∥ Ox','Нужен метод прямоугольного треугольника']},
+  fp:{name:'Фронтально-проецирующая (⊥ П₂)', short:'фронтально-проецирующая', icon:'⊥₂',
+    sign:'Фронтальная проекция — <b>точка</b> A₂ ≡ B₂; горизонтальная ⊥ Ox.',
+    nv:'На П₁ и П₃: |A₁B₁| = |A₃B₃| = |AB|',
+    props:['A₂ ≡ B₂ — точка (вырожденная проекция, след прямой)','A₁B₁ ⊥ Ox, A₃B₃ ∥ Oy′','|A₁B₁| = |A₃B₃| = |AB|','β = 90°, α = γ = 0°','Прямая ∥ П₁ и ∥ П₃ одновременно'],
+    fprops:['A₁ ≡ B₁','|A₂B₂| = |AB|','β = 0°','A₁B₁ ∥ Ox','Нужен метод прямоугольного треугольника']},
+  pp:{name:'Профильно-проецирующая (⊥ П₃)', short:'профильно-проецирующая', icon:'⊥₃',
+    sign:'Обе проекции <b>∥ Ox</b>; профильная — точка A₃ ≡ B₃.',
+    nv:'На П₁ и П₂: |A₁B₁| = |A₂B₂| = |AB|',
+    props:['A₃ ≡ B₃ — точка (вырожденная проекция)','A₁B₁ ∥ Ox и A₂B₂ ∥ Ox','|A₁B₁| = |A₂B₂| = |AB|','γ = 90°, α = β = 0°','Прямая ∥ П₁ и ∥ П₂ одновременно'],
+    fprops:['A₁ ≡ B₁','|A₃B₃| = |AB|','γ = 0°','A₁B₁ ⊥ Ox','Это горизонталь']}
+};
+NG.TYPE_ORDER = ['ga','gd','h','f','p','hp','fp','pp'];
+
+/* случайный отрезок нужного типа (целые мм, I октант) */
+NG.randSeg = function(type, rnd){
+  rnd = rnd || Math.random;
+  const R=(a,b)=>Math.round(a+rnd()*(b-a));
+  const far=(v,lo,hi,min)=>{ let w, i=0; do { w=R(lo,hi); i++; } while (Math.abs(w-v)<min && i<50); return w; };
+  let A={x:R(55,85), y:R(8,45), z:R(8,45)}, B;
+  const x2=R(12,40);
+  switch(type){
+    case 'ga': case 'gd': {
+      let y2, z2, i=0;
+      do { y2=far(A.y,5,50,12); z2=far(A.z,5,50,12); i++; }
+      while ((((A.y-y2)*(A.z-z2)<0)?'ga':'gd')!==type && i<60);
+      B={x:x2,y:y2,z:z2}; break;
+    }
+    case 'h': B={x:x2,y:far(A.y,5,50,12),z:A.z}; break;
+    case 'f': B={x:x2,y:A.y,z:far(A.z,5,50,12)}; break;
+    case 'p': B={x:A.x,y:far(A.y,5,50,12),z:far(A.z,5,50,12)}; break;
+    case 'hp': B={x:A.x,y:A.y,z:far(A.z,5,50,15)}; break;
+    case 'fp': B={x:A.x,y:far(A.y,5,50,15),z:A.z}; break;
+    case 'pp': B={x:x2,y:A.y,z:A.z}; break;
+  }
+  if (type==='ga'||type==='gd'){ if (NG.classify(A,B)!==type){ const t=B.z; B.z=A.z; A.z=t; } }
+  return {A,B};
+};
+})();
+
+</script>
+<script>
+/* Решение «натуральная величина + углы наклона» — пошагово. */
+(function(){
+'use strict';
+const NG = window.NG, G = NG.G, fmt = NG.fmt;
+const {COL, DC, ANG, PL, PLN, DWORD, nk, b, sub} = NG.K;
+const {awayDir, mergePts, outText, sideFor, baseScene, measureEls, triangleEls} = NG.U;
+
+NG.solveNV = function(prob){
+  const {A,B} = prob;
+  const M = NG.measure(A,B);
+  const type = NG.classify(A,B);
+  const find = (prob.find||[1,2]).slice().sort((p,q)=> ((p===3)-(q===3)) || p-q);
+  const bez = !prob.axes;
+  if (prob.axes && find.includes(3)) prob.show3 = true;
+  const base = baseScene(prob);
+  const {S, nm} = base;
+  const P = {1:[S.a1,S.b1],2:[S.a2,S.b2],3:[S.a3,S.b3]};
+  const pn = k=>`${nk(nm[0],k)}${nk(nm[1],k)}`;
+  const AB = nm[0]+nm[1];
+  const steps = [];
+  const ax = bez ? ' (на безосном чертеже — не горизонтальна и не вертикальна)' : '';
+
+  let given = `<p>Дан комплексный чертёж отрезка <b>[${AB}]</b> — две проекции: ${b('p1',pn(1))} и ${b('p2',pn(2))}.</p>`;
+  if (prob.coords) given += `<p class="mono">${nm[0]}(${fmt(A.x)}; ${fmt(A.y)}; ${fmt(A.z)})&nbsp; ${nm[1]}(${fmt(B.x)}; ${fmt(B.y)}; ${fmt(B.z)})</p><p class="muted">Координаты (x; y; z) в мм. Перерисуй условие на лист в клетку (клетка = 5 мм) и строй вместе с разбором.</p>`;
+  given += `<p>Найти: <b>|${AB}|</b>${find.map(k=>`, ${b('ang',ANG[k])} = ∠(${AB}, ${PL[k]})`).join('')}.</p>`;
+  steps.push({title:'Дано', html:given, els:base.els});
+
+  const T = NG.TYPES[type];
+  const glowBoth = [];
+  if (G.dist(S.a1,S.b1)>0.5) glowBoth.push({t:'seg',a:S.a1,b:S.b1,c:'p1',glow:true});
+  if (G.dist(S.a2,S.b2)>0.5) glowBoth.push({t:'seg',a:S.a2,b:S.b2,c:'p2',glow:true});
+  let nvKnown = false;
+  const res = {NV:M.NV, type, ang:{}};
+
+  if (type==='ga'||type==='gd'){
+    steps.push({title:'Что это за прямая?', hl:glowBoth,
+      html:`<p>${b('p1',pn(1))} не параллельна и не перпендикулярна оси x${ax}. ${b('p2',pn(2))} — тоже.</p><p>Значит, это <b>прямая общего положения</b> (${type==='ga'?'восходящая — проекции наклонены в одну сторону':'нисходящая — проекции наклонены в разные стороны'}). Натуральной величины нет ни на одной проекции — все они короче отрезка.</p><p>➜ Работаем <b>методом прямоугольного треугольника</b>.</p>`});
+    find.forEach(k=>{
+      if (k===3 && bez){ gammaHyp(); return; }
+      if (k===3) buildP3();
+      triSteps(k);
+    });
+  } else if (type==='p'){
+    steps.push({title:'Что это за прямая?', hl:glowBoth,
+      html:`<p>Обе проекции лежат на <b>одной вертикальной линии связи</b> → x${sub('A')} = x${sub('B')}.</p><p>Это <b>профильная прямая</b> (∥ П₃). Сразу пишем: ${b('ang','γ = 0°')}.</p><p>На П₁ и П₂ длина искажена, поэтому α и β ищем <b>методом прямоугольного треугольника</b> — как в задаче про [CD] на практике.</p>`});
+    find.filter(k=>k!==3).forEach(k=>triSteps(k));
+    res.ang[3]=0;
+  } else if (type==='h'||type==='f'){
+    const kk = type==='h'?1:2;
+    const mid = G.lerp(P[kk][0],P[kk][1],.5);
+    steps.push({title:'Что это за прямая?', hl:glowBoth.filter(e=>e.c===(kk===1?'p2':'p1')),
+      html:`<p>${type==='h'?b('p2',pn(2))+' ∥ оси x → все точки на одной высоте. Это <b>горизонталь h</b> (∥ П₁).':b('p1',pn(1))+' ∥ оси x → все точки на одной глубине. Это <b>фронталь f</b> (∥ П₂).'}</p><p>Треугольник не нужен: прямая уровня сама показывает НВ на той плоскости, которой параллельна.</p>`});
+    steps.push({title:'Натуральная величина', hl:[{t:'seg',a:P[kk][0],b:P[kk][1],c:'nv',glow:true}],
+      els:[outText(mid, G.add(mid, kk===1?[0,-5]:[0,5]), '|AB| = '+fmt(M.NV), 'nv')],
+      html:`<p>${b('nv',`|${pn(kk)}| = |${AB}| ≈ ${fmt(M.NV)} мм`)} — меряем прямо линейкой.</p>`});
+    find.forEach(k=>{
+      if (k===kk){ res.ang[k]=0; steps.push({title:`Угол ${ANG[k]}`, html:`<p>Прямая параллельна ${PL[k]} → ${b('ang',ANG[k]+' = 0°')}.</p>`}); return; }
+      const v = P[kk][0], w = P[kk][1];
+      const vert = k===3;
+      const dirv = vert ? [0, Math.sign(w[1]-v[1])||1] : [Math.sign(w[0]-v[0])||1, 0];
+      const ref = G.add(v, G.mul(dirv, (vert?Math.abs(w[1]-v[1]):Math.abs(w[0]-v[0]))+6));
+      const val = M.ang[k]; res.ang[k]=val;
+      steps.push({title:`Угол ${ANG[k]}`, els:[{t:'seg',a:v,b:ref,c:'aux',w:'aux'},{t:'ang',v:v,a:ref,b:w,c:'ang',n:ANG[k]+' ≈ '+fmt(val,0)+'°'}],
+        html:`<p>Угол между ${b('p'+kk,pn(kk))} и ${vert?'вертикалью (осью '+(kk===1?'y':'z')+')':'осью x'} — это ${b('ang',`${ANG[k]} ≈ ${fmt(val,0)}°`)} (угол с ${PL[k]}).</p>`});
+    });
+  } else {
+    const kk = {hp:1, fp:2, pp:3}[type];
+    const nvOn = [1,2,3].filter(k=>k!==kk);
+    steps.push({title:'Что это за прямая?', hl:glowBoth,
+      html:`<p>${T.sign}</p><p>Это <b>${T.name.toLowerCase()}</b>. Она ⊥ ${PL[kk]}, а значит ∥ двум другим плоскостям.</p>`});
+    steps.push({title:'Натуральная величина и углы', html:`<p>${b('nv','|'+AB+'| ≈ '+fmt(M.NV)+' мм')} — видна на ${nvOn.map(k=>PL[k]).join(' и ')}.</p><p>${[1,2,3].map(k=>`${ANG[k]} = ${k===kk?90:0}°`).join(', ')}.</p>`});
+    [1,2,3].forEach(k=>res.ang[k]=k===kk?90:0);
+  }
+
+  find.forEach(k=>{ if (res.ang[k]==null) res.ang[k]=M.ang[k]; });
+  const angTxt = find.map(k=>`${b('ang',ANG[k])} ≈ ${fmt(res.ang[k],0)}°`).join(', ');
+  let chk = '';
+  if (type==='ga'||type==='gd'||type==='p'){
+    chk = `<div class="idea good">Проверки: НВ длиннее любой проекции (|${pn(1)}| ≈ ${fmt(M.L1)}, |${pn(2)}| ≈ ${fmt(M.L2)} < ${fmt(M.NV)}) ✓` +
+      (find.includes(1)&&find.includes(2) ? (type==='p' ? '; α + β = 90° ✓ (так и должно быть у профильной прямой)' : `; α + β ≈ ${fmt(M.a+M.b,0)}° ≤ 90° ✓`) : '') + `</div>`;
+  }
+  steps.push({title:'Ответ', html:`<p>${b('nv',`|${AB}| ≈ ${fmt(M.NV)} мм`)}, ${angTxt}${type==='p'&&!find.includes(3)?', '+b('ang','γ = 0°'):''}.</p>${chk}${prob.note||''}`});
+  res.steps = steps; res.M = M; res.find = find; res.base = base;
+  return res;
+
+  function triSteps(k){
+    const [pa,pb] = P[k];
+    const d = M.D[k], L = M.L[k], val = M.ang[k];
+    const D = 'Δ'+DC[k];
+    const tri = triangleEls(k, pa, pb, d, M.NV, val, nm);
+    const Bk = nk(nm[1],k), Ak = nk(nm[0],k);
+    const otherP = k===1?P[2]:P[1];
+    const same = k!==3 && Math.abs(otherP[0][0]-otherP[1][0])<0.6;
+    const where = k===1 ? `на ${b('p2','фронтальной проекции')} (там видны высоты)` : k===2 ? `на ${b('p1','горизонтальной проекции')} (там видны глубины)` : 'по горизонтали — это расстояние между линиями связи точек';
+    const how = same ? `. Здесь обе точки на одной линии связи, поэтому ${D} — это просто <b>длина всей проекции ${pn(k===1?2:1)}</b>` : (k===3 ? '' : `: через одну точку проводим горизонтальную линию до линии связи другой — кусочек линии связи между ними и есть ${D}`);
+    steps.push({title:`Угол ${ANG[k]} (к ${PL[k]}): I катет`, hl:[{t:'seg',a:pa,b:pb,c:COL[k],glow:true}],
+      html:`<p>Угол с ${PL[k]} ищем на <b class="c-${COL[k]}">${PLN[k]} проекции</b>.</p><p>Первый катет — сама проекция ${b(COL[k],'['+pn(k)+']')} ≈ ${fmt(L)} мм.</p>`});
+    let yBelow = null;
+    if (k===3){
+      yBelow = Math.max(S.a1[1],S.b1[1]);
+      steps.forEach(st=>(st.els||[]).forEach(e=>{ if (e.p) yBelow=Math.max(yBelow,e.p[1]); if (e.a&&e.b&&e.t!=='seg') yBelow=Math.max(yBelow,e.a[1],e.b[1]); if (e.t==='seg'&&e.c!=='axis'&&e.c!=='link') yBelow=Math.max(yBelow,e.a[1],e.b[1]); }));
+      yBelow += 10;
+    }
+    steps.push({title:`II катет — ${D}`, els:measureEls(k,S,d,D+' ≈ '+fmt(d),yBelow),
+      html:`<p>Второй катет — ${b('dd',D)}: разность ${DWORD[DC[k]]} концов отрезка.</p><p>Берём его ${where}${how}.</p><p>${b('dd',`${D} ≈ ${fmt(d)} мм`)} — берём в циркуль.</p>`});
+    steps.push({title:`Откладываем ${D} ⊥ ${pn(k)}`, els:tri.s3,
+      html:`<p>В точке ${b(COL[k],Ak)} восстанавливаем <b>перпендикуляр</b> к ${pn(k)} и откладываем на нём ${b('dd',D)} → точка <b>${tri.A0}</b>.</p><p>Угол при ${Ak} прямой — треугольник прямоугольный.</p>`});
+    steps.push({title:'Гипотенуза = натуральная величина', els:tri.s4,
+      html: nvKnown ? `<p>Соединяем ${tri.A0} с ${Bk}. Это снова ${b('nv','|'+AB+'| ≈ '+fmt(M.NV)+' мм')} — должно совпасть с первым треугольником. Хорошая проверка точности чертежа.</p>`
+        : `<p>Соединяем ${tri.A0} с ${Bk}. Гипотенуза ${b('nv',`|${tri.A0}${Bk}| = |${AB}| ≈ ${fmt(M.NV)} мм`)} — настоящая длина отрезка. Меряем линейкой.</p>`});
+    steps.push({title:`Угол ${ANG[k]}`, els:tri.s5,
+      html:`<p>Угол между проекцией ${pn(k)} и гипотенузой ${tri.A0}${Bk} (при вершине ${Bk}) — это угол наклона прямой к ${PL[k]}:</p><p>${b('ang',`${ANG[k]} = ∠(${pn(k)}, ${tri.A0}${Bk}) ≈ ${fmt(val,0)}°`)} — меряем транспортиром.</p>${!nvKnown?'<div class="idea">Угол наклона — всегда <b>между проекцией и гипотенузой</b>. Не между Δ и гипотенузой!</div>':''}`});
+    nvKnown = true; res.ang[k]=val;
+  }
+
+  function buildP3(){
+    const els=[];
+    [[A,S.a1,S.a2,S.a3],[B,S.b1,S.b2,S.b3]].forEach(([Pt,p1,p2,p3])=>{
+      const k45=[Pt.y,Pt.y];
+      els.push({t:'seg',a:p1,b:k45,c:'aux',w:'aux'});
+      els.push({t:'seg',a:k45,b:p3,c:'aux',w:'aux'});
+      els.push({t:'seg',a:p2,b:p3,c:'aux',w:'aux'});
+    });
+    els.push({t:'seg',a:S.a3,b:S.b3,c:'p3'});
+    els.push(...mergePts([{p:S.a3,n:nk(nm[0],3),c:'p3',others:[S.b3,S.a2]},{p:S.b3,n:nk(nm[1],3),c:'p3',others:[S.a3,S.b2]}]));
+    steps.push({title:'Строим профильную проекцию', els,
+      html:`<p>Для угла γ нужна проекция на ${b('p3','П₃')}.</p><p>Правило: ${nk(nm[0],3)} на одной горизонтали с ${nk(nm[0],2)} (та же высота z), а глубину y переносим с горизонтальной проекции через <b>линию 45°</b>: от ${nk(nm[0],1)} вправо до линии 45°, потом вверх. Так же строим ${nk(nm[1],3)} и соединяем.</p>`});
+  }
+
+  function gammaHyp(){
+    const d = M.dx, L3 = M.L3;
+    const allY=[S.a1[1],S.b1[1],S.a2[1],S.b2[1]];
+    let maxX = Math.max(S.a1[0],S.b1[0],S.a2[0],S.b2[0]);
+    let maxY = Math.max(...allY);
+    steps.forEach(st=>(st.els||[]).forEach(e=>{
+      if (e.p){ maxX=Math.max(maxX,e.p[0]); maxY=Math.max(maxY,e.p[1]); }
+      if (e.b&&e.a){ maxX=Math.max(maxX,e.a[0],e.b[0]); maxY=Math.max(maxY,e.a[1],e.b[1]); }
+    }));
+    const X0 = maxX + 30;
+    const Y0 = (Math.min(...allY)+Math.max(...allY))/2 + L3/2;
+    const Pp=[X0,Y0], Q=[X0+d,Y0], Cc=[X0+d,Y0-L3];
+    const tc = Math.atan2(Cc[1]-Pp[1], Cc[0]-Pp[0]);
+    steps.push({title:'Угол γ: что нам нужно', els:measureEls(3,S,d,'Δx ≈ '+fmt(d), maxY+10),
+      html:`<p>Треугольник для ${b('p3','П₃')}: катеты |${pn(3)}| и ${b('dd','Δx')}, гипотенуза |${AB}|.</p><p>Профильной проекции на чертеже нет, но ${b('nv','|'+AB+'|')} мы уже нашли, а ${b('dd','Δx')} — просто расстояние между линиями связи ${nm[0]} и ${nm[1]} (≈ ${fmt(d)} мм).</p><p>➜ Строим треугольник <b>по катету и гипотенузе</b>.</p>`});
+    steps.push({title:'Строим треугольник сбоку', els:[
+        {t:'dim',a:Pp,b:Q,c:'dd',n:'Δx',side:sideFor(Pp,Q,[0,1])},
+        {t:'seg',a:Q,b:[Q[0],Cc[1]-6],c:'aux',w:'aux'},
+        {t:'rt',v:Q,a:Pp,b:Cc,c:'aux'},
+        {t:'arc',o:Pp,r:M.NV,t1:tc-0.22,t2:tc+0.12,c:'nv'},
+        {t:'poly',pts:[Pp,Q,Cc],c:'nv',op:.09},
+        {t:'seg',a:Pp,b:Cc,c:'nv',w:'nv'},
+        outText(G.lerp(Pp,Cc,.5),[(Pp[0]+Q[0]+Cc[0])/3,(Pp[1]+Q[1]+Cc[1])/3],'|'+AB+'|','nv')],
+      html:`<p>На свободном месте откладываем ${b('dd','Δx')}, в его конце ставим перпендикуляр.</p><p>Циркулем радиусом ${b('nv','|'+AB+'|')} из начала отрезка делаем засечку на перпендикуляре и соединяем.</p>`});
+    steps.push({title:'Угол γ', els:[
+        {t:'ang',v:Cc,a:Q,b:Pp,c:'ang',n:'γ ≈ '+fmt(M.g,0)+'°'},
+        {t:'txt',p:G.lerp(Q,Cc,.5),dp:[8,4],n:'|'+pn(3)+'|',c:'p3',anc:'start',size:12}],
+      html:`<p>Вертикальный катет — это длина профильной проекции ${b('p3','|'+pn(3)+'| ≈ '+fmt(L3)+' мм')}.</p><p>Угол между ним и гипотенузой (напротив Δx) — ${b('ang','γ ≈ '+fmt(M.g,0)+'°')}.</p><div class="idea">Другой способ, как на практике: провести оси, построить ${pn(3)} через линию 45° и треугольник на ${pn(3)} с катетом Δx. Ответ тот же.</div>`});
+    res.ang[3] = M.g;
+  }
+};
+})();
+
+</script>
+<script>
+/* Обратные задачи (недостающая проекция по НВ/углу) и задача про треугольник ABC. */
+(function(){
+'use strict';
+const NG = window.NG, G = NG.G, fmt = NG.fmt;
+const {PR, COL, DC, ANG, PL, PLN, DWORD, DEG, nk, b} = NG.K;
+const {awayDir, chooseN, sideFor, axesEls, baseScene, measureEls} = NG.U;
+
+/* prob: {A,B, given:[...], unknown:'B2'|'B1'|'A1'|'A2', aplane:1|2 (угол) или 'nv', val} */
+NG.solveReverse = function(prob){
+  const base = baseScene(prob);
+  const {S, nm} = base;
+  const U = prob.unknown;
+  const uName = U[0], o = +U[1];
+  const kName = uName===nm[0] ? nm[1] : nm[0];
+  const m = 3 - o;
+  const Pm = {1:[S.a1,S.b1],2:[S.a2,S.b2]}[m];
+  const key = n=>n===nm[0]?'a':'b';
+  const pt = (n,k)=>S[key(n)+k];
+  const Km = pt(kName,m), Um = pt(uName,m), Ko = pt(kName,o);
+  const UoX = Um[0];
+  const isNV = prob.aplane==='nv';
+  const k = isNV ? m : prob.aplane;
+  const steps=[];
+  const AB = nm[0]+nm[1];
+  const pn = kk=>`${nk(nm[0],kk)}${nk(nm[1],kk)}`;
+  const known = prob.given.map(g=>nk(g[0],+g[1]));
+  const Uo = nk(uName,o);
+  const valTxt = isNV ? `|${AB}| = ${fmt(prob.val)} мм` : `${ANG[k]} = ∠(${AB}, ${PL[k]}) = ${prob.val}°`;
+  steps.push({title:'Дано', els:base.els, html:`<p>Известны: ${known.join(', ')} и ${b(isNV?'nv':'ang',valTxt)}.</p><p>Найти недостающую проекцию <b>${Uo}</b>. Сколько решений?</p>${prob.coords?`<p class="muted">Координаты известных точек даны в описании задачи — перерисуй условие на лист.</p>`:''}`});
+  const Lm = G.dist(Pm[0],Pm[1]);
+  const res = {sol:[]};
+  const oCol = COL[o];
+
+  if (isNV || k===m){
+    const Dn = 'Δ'+DC[m];
+    const d = isNV ? Math.sqrt(Math.max(0, prob.val*prob.val - Lm*Lm)) : Lm*Math.tan(prob.val/DEG);
+    const NVv = isNV ? prob.val : Lm/Math.cos(prob.val/DEG);
+    const u = G.norm(G.sub(Um,Km));
+    const n = chooseN(u,m);
+    const a0 = G.add(Km,G.mul(n,d));
+    const K0 = kName+'₀';
+    steps.push({title:'Анализ', hl:[{t:'seg',a:Pm[0],b:Pm[1],c:COL[m],glow:true}],
+      html:`<p>${isNV?'Известна НВ':'Угол '+ANG[k]+' — с '+PL[k]}, а на ${b(COL[m],PLN[m]+' проекции')} отрезок [${pn(m)}] есть целиком → строим прямоугольный треугольник прямо на ней.</p><p>Известно: I катет ${b(COL[m],'['+pn(m)+']')} ${isNV?'и гипотенуза '+b('nv','|'+AB+'|'):'и угол '+b('ang',ANG[k])}. Найдём II катет ${b('dd',Dn)} — разность ${DWORD[DC[m]]}. Он и даст ${Uo}.</p>`});
+    const s2 = [{t:'seg',a:Km,b:G.add(Km,G.mul(n,d+8)),c:'aux',w:'aux'},{t:'rt',v:Km,a:Um,b:a0,c:'aux'}];
+    if (isNV){
+      const t0 = G.at2(G.sub(a0,Um));
+      s2.push({t:'arc',o:Um,r:NVv,t1:t0-0.2,t2:t0+0.2,c:'nv'});
+    } else {
+      s2.push({t:'seg',a:Um,b:G.add(Um,G.mul(G.norm(G.sub(a0,Um)),NVv+6)),c:'aux',w:'aux'});
+      s2.push({t:'ang',v:Um,a:Km,b:a0,c:'ang',n:ANG[k]+' = '+prob.val+'°'});
+    }
+    s2.push({t:'pt',p:a0,n:K0,c:'nv',lp:awayDir(a0,[Km,Um])});
+    steps.push({title:'Строим треугольник', els:s2,
+      html: isNV ? `<p>В ${nk(kName,m)} ставим перпендикуляр к ${pn(m)}.</p><p>Циркулем радиусом ${b('nv','|'+AB+'| = '+fmt(NVv)+' мм')} из ${nk(uName,m)} делаем засечку на перпендикуляре → точка ${K0}.</p>`
+        : `<p>В ${nk(kName,m)} ставим перпендикуляр к ${pn(m)}.</p><p>Из ${nk(uName,m)} откладываем транспортиром угол ${b('ang',ANG[k]+' = '+prob.val+'°')} от проекции. Луч пересечёт перпендикуляр в точке ${K0}.</p>`});
+    const right = G.dot(G.norm(G.sub(Um,Km)),[1,0])>0;
+    steps.push({title:`Получили ${Dn}`, els:[{t:'seg',a:Km,b:a0,c:'dd'},{t:'poly',pts:[Km,Um,a0],c:'nv',op:.09},{t:'seg',a:a0,b:Um,c:'nv',w:'nv'},
+        {t:'txt',p:G.lerp(Km,a0,.5),dp:[right?-10:10, 4],n:Dn+' ≈ '+fmt(d),c:'dd',anc:right?'end':'start',size:12.5}],
+      html:`<p>Катет ${b('dd',`|${nk(kName,m)}${K0}| = ${Dn} ≈ ${fmt(d)} мм`)} — вот на сколько ${m===1?'выше или ниже':'ближе или дальше'} точка ${uName}, чем ${kName}.</p>${isNV?'':`<p>Заодно гипотенуза даёт НВ: ${b('nv','|'+AB+'| ≈ '+fmt(NVv)+' мм')}.</p>`}`});
+    const foot = [UoX, Ko[1]];
+    const sg = Math.sign(foot[0]-Ko[0])||1;
+    const s4=[{t:'seg',a:Ko,b:[foot[0]+sg*5,foot[1]],c:'aux',w:'aux'}];
+    const sols=[[UoX,Ko[1]-d],[UoX,Ko[1]+d]];
+    sols.forEach(q=>{ const a=[foot[0]+sg*3.5,foot[1]], b2=[q[0]+sg*3.5,q[1]]; s4.push({t:'dim',a,b:b2,c:'dd',n:Dn,side:sideFor(a,b2,[sg,0])}); });
+    steps.push({title:`Переносим ${Dn} на линию связи`, els:s4,
+      html:`<p>На ${b(oCol,PLN[o]+' проекции')} ${Dn} — это разница по вертикали. Проводим горизонталь через ${nk(kName,o)} до линии связи точки ${uName}.</p><p>От неё откладываем ${b('dd',Dn)} <b>вверх и вниз</b>.</p>`});
+    const s5=[];
+    sols.forEach((q,i)=>{
+      s5.push({t:'seg',a:Ko,b:q,c:oCol,dash:i===1});
+      s5.push({t:'pt',p:q,n:Uo+(i?'′':''),c:oCol,lp:[sg,i?0.6:-0.6]});
+    });
+    let note = '';
+    if (prob.axes){
+      const bad = sols.filter(q=> o===2 ? q[1]>0 : q[1]<0).length;
+      if (bad) note = `<div class="idea warn">Одна из точек оказалась по другую сторону оси x — формально это тоже решение, но точка уже не в I четверти.</div>`;
+    }
+    steps.push({title:'Ответ: два решения', els:s5,
+      html:`<p>Точка ${uName} могла быть ${m===1?'выше':'ближе'} точки ${kName} на ${Dn} или ${m===1?'ниже':'дальше'} на столько же → <b>2 решения</b>: ${Uo} и ${Uo}′.</p>${note}${prob.note||''}`});
+    res.sol = sols; res.count = 2; res.d = d; res.NV = NVv;
+  } else {
+    const Dn = 'Δ'+DC[k];
+    const d = Math.abs(Pm[0][1]-Pm[1][1]);
+    const Lk = d/Math.tan(prob.val/DEG);
+    const NVv = d/Math.sin(prob.val/DEG);
+    const h = Math.abs(UoX-Ko[0]);
+    steps.push({title:'Анализ', hl:[{t:'seg',a:Pm[0],b:Pm[1],c:COL[m],glow:true}],
+      html:`<p>Угол ${b('ang',ANG[k])} — с ${PL[k]}, значит треугольник должен стоять на ${b(COL[k],PLN[k]+' проекции')}. А её-то и нет!</p><p>Зато из ${b(COL[m],PLN[m]+' проекции')} можно взять второй катет ${b('dd',Dn)}. По катету и углу построим треугольник сбоку и узнаем, <b>какой длины</b> должна быть ${PLN[k]} проекция.</p>`});
+    steps.push({title:`Берём ${Dn}`, els:measureEls(k,S,d,Dn+' ≈ '+fmt(d)),
+      html:`<p>${b('dd',Dn)} — разность ${DWORD[DC[k]]}. Она видна на ${PLN[m]} проекции как разница по вертикали: ${b('dd',Dn+' ≈ '+fmt(d)+' мм')}.</p>`});
+    const xs = [S.a1[0],S.b1[0],S.a2[0],S.b2[0]], ys=[S.a1[1],S.b1[1],S.a2[1],S.b2[1]];
+    const X0 = Math.max(...xs)+20, Y0 = Math.max(...ys);
+    const Pp=[X0,Y0], Q=[X0,Y0-d], R=[X0+Lk,Y0];
+    const dimA=[Pp[0],Pp[1]+6], dimB=[R[0],R[1]+6];
+    steps.push({title:'Вспомогательный треугольник', els:[
+        {t:'seg',a:Pp,b:Q,c:'dd'},{t:'txt',p:G.lerp(Pp,Q,.5),dp:[-7,4],n:Dn,c:'dd',anc:'end',size:12.5},
+        {t:'seg',a:Pp,b:[R[0]+6,R[1]],c:'aux',w:'aux'},{t:'rt',v:Pp,a:Q,b:R,c:'aux'},
+        {t:'poly',pts:[Pp,Q,R],c:'nv',op:.09},{t:'seg',a:Q,b:R,c:'nv',w:'nv'},
+        {t:'ang',v:R,a:Pp,b:Q,c:'ang',n:ANG[k]+' = '+prob.val+'°'},
+        {t:'dim',a:dimA,b:dimB,c:COL[k],n:`|${pn(k)}| ≈ ${fmt(Lk)}`,side:sideFor(dimA,dimB,[0,1])}],
+      html:`<p>На свободном месте: вертикальный катет ${b('dd',Dn)}, от его нижнего конца — горизонтальная линия.</p><p>Из верхнего конца проводим гипотенузу так, чтобы угол при горизонтальном катете был ${b('ang',ANG[k]+' = '+prob.val+'°')}.</p><p>Горизонтальный катет — нужная длина ${b(COL[k],'|'+pn(k)+'| ≈ '+fmt(Lk)+' мм')}.</p>`});
+    let sols=[];
+    if (Lk > h + 0.4){ const s=Math.sqrt(Lk*Lk-h*h); sols=[[UoX,Ko[1]-s],[UoX,Ko[1]+s]]; }
+    else if (Lk > h - 0.4){ sols=[[UoX,Ko[1]]]; }
+    let t1,t2;
+    if (sols.length===2){
+      const a1=G.at2(G.sub(sols[0],Ko)), a2=G.at2(G.sub(sols[1],Ko));
+      let dd=a2-a1; while(dd>Math.PI) dd-=2*Math.PI; while(dd<-Math.PI) dd+=2*Math.PI;
+      t1 = a1 - Math.sign(dd)*0.15; t2 = a1 + dd + Math.sign(dd)*0.15;
+    } else { const tDir = G.at2([UoX-Ko[0],0]); t1=tDir-0.45; t2=tDir+0.45; }
+    steps.push({title:'Засечка циркулем', els:[{t:'arc',o:Ko,r:Lk,t1,t2,c:COL[o]}],
+      html:`<p>Из ${nk(kName,o)} проводим дугу радиусом ${b(COL[k],'|'+pn(k)+'| ≈ '+fmt(Lk)+' мм')} до линии связи точки ${uName}.</p><p>Расстояние от ${nk(kName,o)} до этой линии связи — ${fmt(h)} мм. Если радиус больше — 2 точки, равен — 1, меньше — ни одной.</p>`});
+    const s6=[];
+    const sg = Math.sign(UoX-Ko[0])||1;
+    sols.forEach((q,i)=>{ s6.push({t:'seg',a:Ko,b:q,c:oCol,dash:i===1}); s6.push({t:'pt',p:q,n:Uo+(i?'′':''),c:oCol,lp:[sg,i?0.6:-0.6]}); });
+    const cnt = sols.length;
+    const maxAng = Math.atan2(d,h)*DEG;
+    steps.push({title: cnt===2?'Ответ: два решения':cnt===1?'Ответ: одно решение':'Ответ: решений нет', els:s6,
+      html: (cnt===2 ? `<p>Дуга пересекла линию связи в двух точках → <b>2 решения</b>: ${Uo} и ${Uo}′.</p><p>Заодно гипотенуза вспомогательного треугольника — ${b('nv','|'+AB+'| ≈ '+fmt(NVv)+' мм')}.</p>`
+        : cnt===1 ? `<p>Дуга только касается линии связи → <b>1 решение</b>.</p>`
+        : `<p>Радиус (${fmt(Lk)} мм) меньше расстояния до линии связи (${fmt(h)} мм) — дуга до неё не достаёт → <b>решений нет</b>.</p><p>При таких проекциях угол ${ANG[k]} не может быть больше ≈ ${fmt(maxAng,0)}°.</p>`) + (prob.note||'')});
+    res.sol = sols; res.count = cnt; res.d=d; res.Lk=Lk; res.h=h; res.NV=NVv; res.maxAng=maxAng;
+  }
+  res.steps = steps; res.base = base;
+  return res;
+};
+
+/* ---------------- треугольник ABC: наименьшая сторона ---------------- */
+NG.solveTri = function(prob){
+  const N = ['A','B','C'], P3 = {A:prob.A,B:prob.B,C:prob.C};
+  const S = {}; N.forEach(n=>{ S[n+1]=PR[1](P3[n]); S[n+2]=PR[2](P3[n]); });
+  const els = axesEls([prob.A,prob.B,prob.C], false);
+  N.forEach(n=>els.push({t:'seg',a:S[n+1],b:S[n+2],c:'link',w:'link'}));
+  els.push({t:'poly',pts:N.map(n=>S[n+1]),c:'p1',op:.07},{t:'poly',pts:N.map(n=>S[n+2]),c:'p2',op:.07});
+  [['A','B'],['B','C'],['C','A']].forEach(([p,q])=>{ els.push({t:'seg',a:S[p+1],b:S[q+1],c:'p1'}); els.push({t:'seg',a:S[p+2],b:S[q+2],c:'p2'}); });
+  const cen1=[0,0], cen2=[0,0]; N.forEach(n=>{ cen1[0]+=S[n+1][0]/3; cen1[1]+=S[n+1][1]/3; cen2[0]+=S[n+2][0]/3; cen2[1]+=S[n+2][1]/3; });
+  N.forEach(n=>{ els.push({t:'pt',p:S[n+1],n:n+'₁',c:'p1',lp:awayDir(S[n+1],[cen1])}); els.push({t:'pt',p:S[n+2],n:n+'₂',c:'p2',lp:awayDir(S[n+2],[cen2])}); });
+  const cs = P=>[P.x,P.y,P.z].map(v=>fmt(v)).join('; ');
+  const steps=[{title:'Дано', els, html:`<p>Дан треугольник ABC (две проекции).</p><p class="mono">A(${cs(prob.A)})&nbsp; B(${cs(prob.B)})&nbsp; C(${cs(prob.C)})</p><p>Найти: какая сторона <b>наименьшая</b>, и для неё — углы ${b('ang','α')} и ${b('ang','β')}.</p>`}];
+  steps.push({title:'План', html:`<p>1) Находим НВ каждой стороны. Удобно: I катет — горизонтальная проекция стороны, II катет — Δz (с фронтальной).</p><p>2) Если сторона — прямая уровня (одна проекция ∥ x), её НВ видна сразу.</p><p>3) Сравниваем, берём наименьшую и ищем её α и β.</p>`});
+  const sides = [['A','B'],['B','C'],['A','C']];
+  const low = Math.max(...N.map(n=>S[n+1][1]));
+  let X = Math.min(...N.map(n=>S[n+1][0]));
+  const rowY = low + 22 + Math.max(...sides.map(([p,q])=>Math.abs(P3[p].z-P3[q].z)));
+  const info = {};
+  sides.forEach(([p,q])=>{
+    const Mv = NG.measure(P3[p],P3[q]); const nmS = p+q;
+    info[nmS] = Mv;
+    const st = {title:`Сторона ${nmS}`, els:[], hl:[]};
+    if (Mv.dz < 0.35){
+      st.hl.push({t:'seg',a:S[p+1],b:S[q+1],c:'nv',glow:true});
+      st.html = `<p>${p}₂${q}₂ ∥ оси x → ${nmS} — <b>горизонталь</b>. НВ видна сразу на П₁: ${b('nv',`|${nmS}| = |${p}₁${q}₁| ≈ ${fmt(Mv.NV)} мм`)}.</p><p>И сразу α = 0°.</p>`;
+    } else {
+      const Pp=[X,rowY], Q=[X+Mv.L1,rowY], R=[X,rowY-Mv.dz];
+      Mv.tri={Pp,Q,R};
+      measureEls(1,{a2:S[p+2],b2:S[q+2]},Mv.dz,'Δz').forEach(e=>st.hl.push(e));
+      st.els.push({t:'seg',a:Pp,b:Q,c:'p1'},{t:'seg',a:Pp,b:R,c:'dd'},{t:'rt',v:Pp,a:Q,b:R,c:'aux'},{t:'poly',pts:[Pp,Q,R],c:'nv',op:.08},{t:'seg',a:R,b:Q,c:'nv',w:'nv'},
+        {t:'txt',p:G.lerp(Pp,Q,.5),dp:[0,16],n:`|${p}₁${q}₁|`,c:'p1',size:12},{t:'txt',p:R,dp:[4,-8],n:`|${nmS}| ≈ ${fmt(Mv.NV)}`,c:'nv',size:12,anc:'start',val:true});
+      st.html = Mv.dy < 0.35 ? `<p>${p}₁${q}₁ ∥ оси x → ${nmS} — <b>фронталь</b>, НВ видна сразу на П₂: ${b('nv',`|${nmS}| = |${p}₂${q}₂| ≈ ${fmt(Mv.NV)} мм`)}. Для единообразия построим и треугольник (он пригодится для α).</p>`
+        : `<p>Строим сбоку треугольник: I катет = ${b('p1',`|${p}₁${q}₁|`)} (переносим циркулем), II катет = ${b('dd','Δz ≈ '+fmt(Mv.dz)+' мм')} (разность высот ${p} и ${q} — с фронтальной проекции).</p><p>Гипотенуза: ${b('nv',`|${nmS}| ≈ ${fmt(Mv.NV)} мм`)}.</p>`;
+      X += Mv.L1 + 18;
+    }
+    steps.push(st);
+  });
+  const arr = Object.keys(info).sort((a,c)=>info[a].NV-info[c].NV);
+  const mn = arr[0], Mm = info[mn];
+  steps.push({title:'Какая наименьшая?', html:`<table class="t"><tr><th>сторона</th><th>НВ, мм</th></tr>${arr.map(s=>`<tr><td>${s}</td><td>${fmt(info[s].NV)}</td></tr>`).join('')}</table><p style="margin-top:8px">Наименьшая — <b>${mn}</b>.</p>`});
+  const [p,q] = mn.split('');
+  const aEls=[];
+  if (Mm.tri) aEls.push({t:'ang',v:Mm.tri.Q,a:Mm.tri.Pp,b:Mm.tri.R,c:'ang',n:'α ≈ '+fmt(Mm.a,0)+'°'});
+  steps.push({title:`α для ${mn}`, els:aEls, html: Mm.dz<0.35 ? `<p>${mn} — горизонталь → ${b('ang','α = 0°')}.</p>` : `<p>Треугольник для ${mn} уже построен на горизонтальной проекции. Угол между катетом |${p}₁${q}₁| и гипотенузой: ${b('ang','α ≈ '+fmt(Mm.a,0)+'°')}.</p>`});
+  const bEls=[];
+  if (Mm.dy>0.35){
+    const Pp=[Math.min(...N.map(n=>S[n+1][0])), rowY+22+Mm.dy], Q=[Pp[0]+Mm.L2,Pp[1]], R=[Pp[0],Pp[1]-Mm.dy];
+    bEls.push({t:'seg',a:Pp,b:Q,c:'p2'},{t:'seg',a:Pp,b:R,c:'dd'},{t:'rt',v:Pp,a:Q,b:R,c:'aux'},{t:'poly',pts:[Pp,Q,R],c:'nv',op:.08},{t:'seg',a:R,b:Q,c:'nv',w:'nv'},{t:'ang',v:Q,a:Pp,b:R,c:'ang',n:'β ≈ '+fmt(Mm.b,0)+'°'},
+      {t:'txt',p:G.lerp(Pp,Q,.5),dp:[0,16],n:`|${p}₂${q}₂|`,c:'p2',size:12},{t:'txt',p:G.lerp(Pp,R,.5),dp:[-8,4],n:'Δy',c:'dd',size:12,anc:'end'});
+  }
+  steps.push({title:`β для ${mn}`, els:bEls, html: Mm.dy<0.35 ? `<p>${mn} — фронталь → ${b('ang','β = 0°')}.</p>` : `<p>Сбоку треугольник для П₂: I катет ${b('p2',`|${p}₂${q}₂|`)}, II катет ${b('dd','Δy ≈ '+fmt(Mm.dy)+' мм')} (разность глубин — с горизонтальной проекции). Угол при проекции: ${b('ang','β ≈ '+fmt(Mm.b,0)+'°')}.</p>`});
+  steps.push({title:'Ответ', html:`<p>Наименьшая сторона — <b>${mn}</b>: ${b('nv','|'+mn+'| ≈ '+fmt(Mm.NV)+' мм')}, ${b('ang','α ≈ '+fmt(Mm.a,0)+'°')}, ${b('ang','β ≈ '+fmt(Mm.b,0)+'°')}.</p>`});
+  return {steps, info, min:mn, M:Mm};
+};
+})();
+
+</script>
+<script>
+/* Карточки «Дано / Алгоритм» для конструктора оформления. */
+(function(){
+'use strict';
+const NG = window.NG, fmt = NG.fmt;
+const {DC, ANG, PL, PLN, DWORD, nk, sub} = NG.K;
+let cid = 0;
+const C = (zone, text, ok, why, g, r, go)=>({id:'c'+(++cid), zone, text, ok, why, g:g||'', r:r||0, go:go||0});
+
+NG.cardsNV = function(prob, sol){
+  const nm = prob.names||['A','B']; const AB = nm[0]+nm[1];
+  const find = sol.find, type = sol.type;
+  const pn = k=>`${nk(nm[0],k)}${nk(nm[1],k)}`;
+  const g = [], a = [];
+  g.push(C('given',`[${AB}] (${pn(1)}, ${pn(2)})`,true,'Условие: отрезок задан двумя проекциями.'));
+  g.push(C('given',`|${AB}| — ?`,true,'Натуральную величину ищем вместе с углами.'));
+  find.forEach(k=>g.push(C('given',`${ANG[k]} = ∠(${AB}, ${PL[k]}) — ?`,true,`Спрашивают угол с ${PL[k]}.`)));
+  [1,2,3].filter(k=>!find.includes(k)).slice(0,1).forEach(k=>g.push(C('given',`${ANG[k]} = ∠(${AB}, ${PL[k]}) — ?`,false,`Угол с ${PL[k]} в этой задаче не спрашивают.`)));
+  g.push(C('given',`|${AB}| = |${pn(1)}|`,false,'Этого нет в условии. Так было бы только у горизонтали.'));
+  const bez = !prob.axes;
+  if (type==='ga'||type==='gd'){
+    a.push(C('algo','Прямая общего положения → НВ и углы ищем методом прямоугольного треугольника',true,'Первым делом определяем тип прямой: ни одна проекция не ∥ и не ⊥ оси x.','T',0,0));
+    find.forEach(k=>{
+      const D='Δ'+DC[k], c=DC[k];
+      if (k===3 && bez){
+        a.push(C('algo',`Катет — Δx = x${sub(nm[0])} − x${sub(nm[1])} (расстояние между линиями связи)`,true,'Для П₃ второй катет — разность широт Δx.','G3',0,1));
+        a.push(C('algo',`Гипотенуза — уже найденная |${AB}| (засечка циркулем)`,true,'Профильной проекции нет, поэтому треугольник строим по катету Δx и гипотенузе.','G3',0,1));
+        a.push(C('algo',`Второй катет получился = |${pn(3)}|`,true,`В треугольнике для П₃ катеты — |${pn(3)}| и Δx.`,'G3',1,1));
+        a.push(C('algo',`γ — угол между гипотенузой и катетом |${pn(3)}| (напротив Δx)`,true,'Угол наклона — между проекцией и гипотенузой.','G3',2,1));
+        return;
+      }
+      let r0 = 0;
+      if (k===3){ a.push(C('algo',`Строим профильную проекцию ${pn(3)} (через линию 45°)`,true,'Для угла γ нужен треугольник на П₃, а значит сама проекция на П₃.','G3',0,1)); r0=1; }
+      a.push(C('algo',`I катет — [${pn(k)}]`,true,`Треугольник для ${PL[k]} строим на ${PLN[k]} проекции.`,'G'+k,r0,1));
+      a.push(C('algo',`II катет — ${D} = ${c}${sub(nm[0])} − ${c}${sub(nm[1])}`,true,`Для ${PL[k]} второй катет — разность ${DWORD[c]}.`,'G'+k,r0,1));
+      a.push(C('algo',`|${nm[0]}₀${nk(nm[1],k)}| = |${AB}| (гипотенуза)`,true,'Гипотенуза — натуральная величина.','G'+k,r0+1,1));
+      a.push(C('algo',`${ANG[k]} = ∠(${pn(k)}, ${nm[0]}₀${nk(nm[1],k)}) = ∠(${AB}, ${PL[k]})`,true,'Угол между проекцией и гипотенузой = угол наклона к этой плоскости проекций.','G'+k,r0+2,1));
+    });
+    [1,2,3].filter(k=>!find.includes(k)).forEach(k=>{
+      a.push(C('algo',`II катет — Δ${DC[k]} = ${DC[k]}${sub(nm[0])} − ${DC[k]}${sub(nm[1])}`,false,`Δ${DC[k]} нужен только для угла ${ANG[k]} с ${PL[k]}, а его здесь не ищут.`));
+    });
+    a.push(C('algo',`|${pn(1)}| = |${AB}| — НВ видна сразу`,false,'Так только у горизонтали (A₂B₂ ∥ x). У прямой общего положения любая проекция короче отрезка.'));
+    a.push(C('algo','II катет откладываем вдоль проекции (на её продолжении)',false,'Катеты взаимно перпендикулярны: Δ откладываем перпендикулярно проекции.'));
+    a.push(C('algo','Угол наклона — между II катетом (Δ) и гипотенузой',false,'Это угол напротив проекции, он равен 90° минус угол наклона. Нужен угол между проекцией и гипотенузой.'));
+    if (!find.includes(3)) a.push(C('algo','γ = 0°, т.к. прямая ∥ П₃',false,'Это верно только для профильной прямой. У нас прямая общего положения.'));
+  } else if (type==='p'){
+    a.push(C('algo','Проекции на одной линии связи → профильная прямая (∥ П₃), γ = 0°',true,'x_A = x_B: прямая параллельна П₃.','T',0,0));
+    [1,2].filter(k=>find.includes(k)).forEach(k=>{
+      const D='Δ'+DC[k], c=DC[k], other = k===1?2:1;
+      a.push(C('algo',`I катет — [${pn(k)}]`,true,`Для ${PL[k]} — ${PLN[k]} проекция.`,'G'+k,0,1));
+      a.push(C('algo',`II катет — ${D} = ${c}${sub(nm[0])} − ${c}${sub(nm[1])} (= длина ${pn(other)})`,true,`У профильной прямой ${D} — это вся длина ${pn(other)}.`,'G'+k,0,1));
+      a.push(C('algo',`|${nm[0]}₀${nk(nm[1],k)}| = |${AB}|`,true,'Гипотенуза — НВ.','G'+k,1,1));
+      a.push(C('algo',`${ANG[k]} = ∠(${pn(k)}, ${nm[0]}₀${nk(nm[1],k)})`,true,'Угол между проекцией и гипотенузой.','G'+k,2,1));
+    });
+    if (find.includes(1)&&find.includes(2)) a.push(C('algo','Проверка: α + β = 90°',true,'У профильной прямой γ = 0°, поэтому α + β = 90°.','Z',0,9));
+    a.push(C('algo',`|${pn(2)}| = |${AB}|, раз проекция вертикальна`,false,'Вертикальность ничего не даёт: A₂B₂ — это только Δz, отрезок ещё уходит в глубину.'));
+    a.push(C('algo','Прямая общего положения',false,'Проекции ⊥ оси x (на одной линии связи) — это частное положение: профильная прямая.'));
+    a.push(C('algo','γ = 90°',false,'Профильная прямая ∥ П₃, значит γ = 0°.'));
+    a.push(C('algo',`II катет — Δx = x${sub(nm[0])} − x${sub(nm[1])}`,false,'Здесь Δx = 0 — точки на одной линии связи.'));
+  } else if (type==='h'||type==='f'){
+    const kk = type==='h'?1:2, ok2 = type==='h'?2:1;
+    a.push(C('algo', type==='h' ? `${pn(2)} ∥ Ox → горизонталь h (∥ П₁)` : `${pn(1)} ∥ Ox → фронталь f (∥ П₂)`, true,'Одна проекция ∥ оси x → прямая уровня.','T',0,0));
+    a.push(C('algo',`|${pn(kk)}| = |${AB}| — НВ без построений`,true,'Прямая уровня проецируется в НВ на плоскость, которой параллельна.','N',0,1));
+    find.forEach(k=>{
+      if (k===kk) a.push(C('algo',`${ANG[k]} = 0°`,true,`Прямая ∥ ${PL[k]}.`,'A'+k,0,2));
+      else a.push(C('algo',`${ANG[k]} = ∠(${pn(kk)}, ${k===3?(kk===1?'Oy':'Oz'):'Ox'})`,true,'Угол между НВ-проекцией и осью.','A'+k,0,2));
+    });
+    a.push(C('algo',`Строим прямоугольный треугольник на ${pn(kk)}`,false,'Не нужно: второй катет был бы 0 — НВ уже видна.'));
+    a.push(C('algo',`|${pn(ok2)}| = |${AB}|`,false,`НВ на ${PL[kk]}, а не на ${PL[ok2]}.`));
+    a.push(C('algo',`${ANG[ok2]} = 0°`,false,`Прямая не ∥ ${PL[ok2]}.`));
+  } else {
+    const kk = {hp:1,fp:2,pp:3}[type];
+    a.push(C('algo',`Проецирующая прямая (⊥ ${PL[kk]})`,true,NG.TYPES[type].sign,'T',0,0));
+    a.push(C('algo',`НВ видна на ${[1,2,3].filter(k=>k!==kk).map(k=>PL[k]).join(' и ')}`,true,'Прямая ∥ двум другим плоскостям.','N',0,1));
+    a.push(C('algo',`${ANG[kk]} = 90°, остальные углы 0°`,true,'Перпендикулярна одной плоскости, параллельна двум.','A',0,2));
+    a.push(C('algo','Метод прямоугольного треугольника',false,'Не нужен: НВ видна сразу.'));
+  }
+  return g.concat(a);
+};
+
+NG.cardsRev = function(prob, sol){
+  const nm = prob.names||['A','B']; const AB=nm[0]+nm[1];
+  const U = prob.unknown, uName=U[0], o=+U[1], kName = uName===nm[0]?nm[1]:nm[0], m=3-o;
+  const isNV = prob.aplane==='nv', k = isNV?m:prob.aplane;
+  const pn = kk=>`${nk(nm[0],kk)}${nk(nm[1],kk)}`;
+  const Uo = nk(uName,o);
+  const out=[];
+  out.push(C('given',`[${AB}] (${pn(m)}, ${nk(kName,o)})`,true,'Условие: одна проекция целиком и одна точка другой.'));
+  out.push(C('given', isNV?`|${AB}| = ${fmt(prob.val)} мм`:`${ANG[k]} = ∠(${AB}, ${PL[k]}) = ${prob.val}°`,true,'Данная величина.'));
+  out.push(C('given',`${Uo} — ?`,true,'Ищем недостающую проекцию.'));
+  out.push(C('given','Сколько решений — ?',true,'В этих задачах всегда спрашивают число решений.'));
+  out.push(C('given', isNV?`${ANG[k]} = ${prob.val}°`:`|${AB}| — дано`,false,'Этого нет в условии.'));
+  const Dm='Δ'+DC[m], Dk='Δ'+DC[k];
+  if (isNV || k===m){
+    out.push(C('algo',`I катет — [${pn(m)}]`,true,`${isNV?'НВ':'Угол с '+PL[k]} → треугольник на ${PLN[m]} проекции.`,'S',0,0));
+    out.push(C('algo', isNV?`Засечка из ${nk(uName,m)} радиусом |${AB}| на перпендикуляре в ${nk(kName,m)} → ${kName}₀`:`Из ${nk(uName,m)} угол ${ANG[k]} до перпендикуляра в ${nk(kName,m)} → ${kName}₀`,true,'Так строим прямоугольный треугольник по известным данным.','S',1,0));
+    out.push(C('algo',`|${nk(kName,m)}${kName}₀| = ${Dm} (II катет)`,true,`Второй катет — разность ${DWORD[DC[m]]}.`,'S',2,0));
+    out.push(C('algo',`На линии связи ${uName} откладываем ${Dm} вверх и вниз от уровня ${nk(kName,o)} → ${Uo}, ${Uo}′`,true,`${Dm} виден на ${PLN[o]} проекции как разница по вертикали.`,'S',3,0));
+    out.push(C('algo','Ответ: 2 решения',true,'Точка может быть с любой стороны на расстоянии Δ.','S',4,0));
+    out.push(C('algo',`${Dm} откладываем от точки ${nk(uName,m)}`,false,`${Dm} переносим на ${PLN[o]} проекцию, от уровня ${nk(kName,o)}.`));
+    out.push(C('algo',`I катет — [${pn(o)}]`,false,`Проекции ${pn(o)} ещё нет — её мы и ищем.`));
+    out.push(C('algo','Ответ: 1 решение',false,'Δ можно отложить и вверх, и вниз — решений два.'));
+  } else {
+    out.push(C('algo',`${Dk} берём с ${PLN[m]} проекции`,true,`Для угла с ${PL[k]} нужен ${Dk}, он виден на ${PLN[m]} проекции.`,'S',0,0));
+    out.push(C('algo',`Сбоку строим треугольник по катету ${Dk} и углу ${ANG[k]} → второй катет = |${pn(k)}|`,true,`Треугольник для ${PL[k]}: катеты |${pn(k)}| и ${Dk}.`,'S',1,0));
+    out.push(C('algo',`Дуга из ${nk(kName,o)} радиусом |${pn(k)}| до линии связи ${uName}`,true,'Длина проекции известна — остаётся найти, где её конец на линии связи.','S',2,0));
+    const cnt = sol.count;
+    out.push(C('algo',`Ответ: ${cnt===2?'2 решения':cnt===1?'1 решение':'решений нет'}`,true,'Число точек пересечения дуги и линии связи.','S',3,0));
+    out.push(C('algo',`I катет — [${pn(m)}], угол ${ANG[k]} при нём`,false,`На ${PLN[m]} проекции строится угол с ${PL[m]}, а не с ${PL[k]}.`));
+    out.push(C('algo',`Ответ: ${cnt===2?'1 решение':'2 решения'}`,false,'Посчитай точки пересечения дуги с линией связи.'));
+  }
+  return out;
+};
+
+NG.cardsTri = function(){
+  const out=[];
+  out.push(C('given','△ABC (A₁B₁C₁, A₂B₂C₂)',true,'Условие.'));
+  out.push(C('given','Наименьшая сторона — ?',true,'Что ищем.'));
+  out.push(C('given','α, β наименьшей стороны — ?',true,'Что ищем.'));
+  out.push(C('given','|AB| = |A₁B₁|',false,'Не дано.'));
+  out.push(C('algo','НВ каждой стороны: I катет — её горизонтальная проекция, II катет — Δz',true,'Стандартный треугольник на П₁.','S',0,0));
+  out.push(C('algo','Сторона — прямая уровня → НВ видна сразу',true,'Экономит построения.','S',0,0));
+  out.push(C('algo','Сравниваем НВ → наименьшая сторона',true,'Сравнивать можно только натуральные величины.','S',1,0));
+  out.push(C('algo','α — угол между горизонтальной проекцией и гипотенузой',true,'Треугольник на П₁ даёт α.','S',2,0));
+  out.push(C('algo','β: I катет — фронтальная проекция, II катет — Δy',true,'Треугольник на П₂ даёт β.','S',2,0));
+  out.push(C('algo','Наименьшая сторона — та, у которой короче проекции',false,'Проекции искажены по-разному — сравнивать можно только НВ.'));
+  out.push(C('algo','β — из того же треугольника, что и α',false,'β — угол с П₂, нужен треугольник на фронтальной проекции.'));
+  return out;
+};
+
+/* проверка порядка: группы (go) и ранги (r); карточки с равными значениями можно менять местами */
+NG.checkAlgo = function(seq, cards){
+  const byId = {}; cards.forEach(c=>byId[c.id]=c);
+  const correct = cards.filter(c=>c.zone==='algo' && c.ok);
+  const pos = {}; seq.forEach((id,i)=>pos[id]=i);
+  const groups = {};
+  correct.forEach(c=>{ (groups[c.g] = groups[c.g]||{go:c.go, items:[]}).items.push(c); });
+  const first = g=>Math.min(...groups[g].items.map(c=>pos[c.id]!=null?pos[c.id]:1e9));
+  const gorder = Object.keys(groups).sort((a,b)=> groups[a].go-groups[b].go || first(a)-first(b));
+  const canon = [];
+  gorder.forEach(g=>groups[g].items.slice().sort((a,b)=> a.r-b.r || ((pos[a.id]!=null?pos[a.id]:1e9)-(pos[b.id]!=null?pos[b.id]:1e9))).forEach(c=>canon.push(c.id)));
+  const good = c=>c && c.ok && c.zone==='algo';
+  const userOk = seq.filter(id=>good(byId[id]));
+  const canonP = canon.filter(id=>pos[id]!=null);
+  const n=userOk.length, m=canonP.length, L=[];
+  for (let i=0;i<=n;i++){ L.push(new Array(m+1).fill(0)); }
+  for (let i=n-1;i>=0;i--) for (let j=m-1;j>=0;j--) L[i][j] = userOk[i]===canonP[j] ? L[i+1][j+1]+1 : Math.max(L[i+1][j], L[i][j+1]);
+  const inL = new Set(); let i=0,j=0;
+  while(i<n&&j<m){ if (userOk[i]===canonP[j]){ inL.add(userOk[i]); i++; j++; } else if (L[i+1][j]>=L[i][j+1]) i++; else j++; }
+  const marks = {};
+  seq.forEach(id=>{ const c=byId[id]; marks[id] = !good(c) ? 'bad' : (inL.has(id) ? 'ok' : 'pos'); });
+  const missing = correct.filter(c=>pos[c.id]==null);
+  return {marks, missing, canon};
+};
+})();
+
+</script>
+<script>
+/* Конструктор оформления: карточки перетаскиваются (или нажимаются) в блоки «Дано» и «Алгоритм». */
+(function(){
+'use strict';
+const NG = window.NG;
+
+NG.store = NG.store || {
+  get(k, d){ try { const v = localStorage.getItem('ng-geo:'+k); return v==null ? d : JSON.parse(v); } catch(e){ return d; } },
+  set(k, v){ try { localStorage.setItem('ng-geo:'+k, JSON.stringify(v)); } catch(e){} if (NG.onStore) NG.onStore(k,v); }
+};
+
+function hash(s){ let h=2166136261; for (let i=0;i<s.length;i++){ h^=s.charCodeAt(i); h=Math.imul(h,16777619); } return h>>>0; }
+NG.rng = function(seed){ let a = typeof seed==='number'?seed:hash(String(seed)); return function(){ a|=0; a=a+0x6D2B79F5|0; let t=Math.imul(a^a>>>15,1|a); t=t+Math.imul(t^t>>>7,61|t)^t; return ((t^t>>>14)>>>0)/4294967296; }; };
+function shuffle(arr, seed){ const r=NG.rng(seed), a=arr.slice(); for (let i=a.length-1;i>0;i--){ const j=Math.floor(r()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; }
+NG.shuffle = shuffle;
+
+const ZN = {given:'Дано', algo:'Алгоритм'};
+
+NG.Constructor = function(host, cards, opts){
+  opts = opts || {};
+  const byId = {}; cards.forEach(c=>byId[c.id]=c);
+  const st = {bank: shuffle(cards.map(c=>c.id), opts.key||'k'), given:[], algo:[], active:'given', checked:false, marks:{}};
+  const root = document.createElement('div'); root.className='cons';
+  host.appendChild(root);
+  root.innerHTML = `<div class="cons-top"><h4>🧩 Собери оформление сам</h4><span class="muted" style="font-size:13px">Нажми на карточку — она уйдёт в выделенный блок. Тяни за ⋮⋮, чтобы переставлять.</span></div>
+    <div class="cons-grid">
+      <div class="zone" data-z="given"><div class="zone-h">Дано <em></em></div><div class="zlist" data-z="given"></div></div>
+      <div class="zone" data-z="algo"><div class="zone-h">Алгоритм <em></em></div><div class="zlist" data-z="algo"></div></div>
+    </div>
+    <div class="bank-wrap"><div class="zone-h">Карточки <em>есть лишние — не всё надо брать!</em></div><div class="bank zlist" data-z="bank"></div></div>
+    <div class="cons-foot"><button class="btn pri sm chk" type="button">Проверить</button><button class="btn sm hint" type="button">Подсказка</button><button class="btn sm show" type="button">Показать ответ</button><button class="btn sm rst" type="button">Сбросить</button></div>
+    <div class="verdict"></div>`;
+  const Z = z=>root.querySelector(`.zlist[data-z="${z}"]`);
+  const verdict = root.querySelector('.verdict');
+
+  root.querySelectorAll('.zone').forEach(zn=>zn.querySelector('.zone-h').addEventListener('click',()=>{ st.active = zn.dataset.z; render(); }));
+
+  function moveTo(id, z, idx){
+    ['bank','given','algo'].forEach(k=>{ const i=st[k].indexOf(id); if (i>=0) st[k].splice(i,1); });
+    const L = st[z];
+    if (idx==null || idx>L.length) idx = L.length;
+    L.splice(idx,0,id);
+    st.checked=false; st.marks={}; verdict.className='verdict';
+    render();
+  }
+
+  function cardEl(id, z, i){
+    const c = byId[id];
+    const el = document.createElement('div');
+    el.className = 'ccard'; el.dataset.id = id;
+    const mk = st.checked ? st.marks[id] : null;
+    if (mk) el.classList.add(mk);
+    const inZone = z!=='bank';
+    const sym = mk==='ok'?'✓':mk==='bad'?'✗':mk==='pos'?'↕':'';
+    const btns = inZone ? '<div class="cbtns"><button type="button" data-a="up" title="Выше">↑</button><button type="button" data-a="dn" title="Ниже">↓</button><button type="button" data-a="x" title="Убрать">✕</button></div>' : '';
+    el.innerHTML = `<span class="hdl" aria-hidden="true">⋮⋮</span><div class="ctext">${mk?`<span class="mark">${sym}</span>`:''}${z==='algo'?`<span class="cno">${i+1})</span>`:''}${c.text}<div class="cwhy"></div></div>${btns}`;
+    if (mk){
+      let why = c.why;
+      if (mk==='bad' && c.ok && c.zone!==z) why = `Верно, но это для блока «${ZN[c.zone]}».`;
+      else if (mk==='bad') why = 'Лишняя: ' + c.why;
+      else if (mk==='pos') why = 'Верная мысль, но стоит не на своём месте. ' + (opts.orderHint||'Порядок: сначала тип прямой, потом для каждого угла — I катет → II катет → гипотенуза → угол.');
+      el.querySelector('.cwhy').textContent = why;
+    }
+    el.querySelector('.ctext').addEventListener('click', ()=>{ if (!inZone) moveTo(id, st.active); });
+    el.querySelectorAll('.cbtns button').forEach(bt=>bt.addEventListener('click', e=>{
+      e.stopPropagation();
+      const L = st[z], k = L.indexOf(id);
+      if (bt.dataset.a==='x') moveTo(id,'bank');
+      else if (bt.dataset.a==='up' && k>0) moveTo(id,z,k-1);
+      else if (bt.dataset.a==='dn' && k<L.length-1) moveTo(id,z,k+1);
+    }));
+    el.querySelector('.hdl').addEventListener('pointerdown', e=>startDrag(e, id, el));
+    return el;
+  }
+  function render(){
+    ['given','algo','bank'].forEach(z=>{
+      const L = Z(z); L.innerHTML='';
+      st[z].forEach((id,i)=>L.appendChild(cardEl(id,z,i)));
+      if (!st[z].length){ const e=document.createElement('div'); e.className='zempty'; e.textContent = z==='bank' ? 'Все карточки разобраны.' : (st.active===z ? 'Нажимай на карточки снизу — они попадут сюда.' : 'Нажми на заголовок, чтобы выбрать этот блок.'); L.appendChild(e); }
+    });
+    root.querySelectorAll('.zone').forEach(zn=>{ const on = zn.dataset.z===st.active; zn.classList.toggle('act', on); zn.querySelector('em').textContent = on ? '● сюда добавляются карточки' : 'нажми, чтобы выбрать'; });
+  }
+
+  /* перетаскивание мышью и пальцем — за ручку ⋮⋮ */
+  let drag = null;
+  function startDrag(e, id, el){
+    e.preventDefault();
+    const r = el.getBoundingClientRect();
+    const ghost = el.cloneNode(true); ghost.classList.add('ghost'); ghost.style.width = r.width+'px';
+    document.body.appendChild(ghost);
+    drag = {id, ghost, dx:e.clientX-r.left, dy:e.clientY-r.top, target:null, idx:null};
+    el.style.opacity = .35;
+    moveGhost(e);
+    window.addEventListener('pointermove', onMove);
+    window.addEventListener('pointerup', onUp, {once:true});
+    window.addEventListener('pointercancel', onUp, {once:true});
+  }
+  function moveGhost(e){ drag.ghost.style.left=(e.clientX-drag.dx)+'px'; drag.ghost.style.top=(e.clientY-drag.dy)+'px'; }
+  function onMove(e){
+    if (!drag) return;
+    moveGhost(e);
+    const under = document.elementFromPoint(e.clientX, e.clientY);
+    root.querySelectorAll('.zone,.bank').forEach(z=>z.classList.remove('over'));
+    let list = under && under.closest ? under.closest('.zlist') : null;
+    if (!list){ const zn = under && under.closest ? under.closest('.zone') : null; if (zn) list = zn.querySelector('.zlist'); }
+    if (!list || !root.contains(list)){ drag.target=null; return; }
+    (list.closest('.zone')||list).classList.add('over');
+    const kids = [...list.querySelectorAll('.ccard')].filter(k=>k.dataset.id!==drag.id);
+    let idx = kids.length;
+    for (let i=0;i<kids.length;i++){ const rr=kids[i].getBoundingClientRect(); if (e.clientY < rr.top+rr.height/2){ idx=i; break; } }
+    drag.target = list.dataset.z; drag.idx = idx;
+    if (e.clientY < 60) window.scrollBy(0,-12); else if (e.clientY > window.innerHeight-60) window.scrollBy(0,12);
+  }
+  function onUp(){
+    window.removeEventListener('pointermove', onMove);
+    root.querySelectorAll('.zone,.bank').forEach(z=>z.classList.remove('over'));
+    if (!drag) return;
+    drag.ghost.remove();
+    const d = drag; drag = null;
+    if (d.target) moveTo(d.id, d.target, d.idx); else render();
+  }
+
+  function check(){
+    const marks = {};
+    st.given.forEach(id=>{ const c=byId[id]; marks[id] = (c.ok && c.zone==='given') ? 'ok' : 'bad'; });
+    const ra = NG.checkAlgo(st.algo, cards);
+    Object.assign(marks, ra.marks);
+    const missG = cards.filter(c=>c.zone==='given'&&c.ok&&!st.given.includes(c.id));
+    const miss = missG.length + ra.missing.length;
+    const vals = Object.values(marks);
+    const bad = vals.filter(m=>m==='bad').length, pos = vals.filter(m=>m==='pos').length;
+    st.checked = true; st.marks = marks;
+    render();
+    if (!bad && !pos && !miss){
+      verdict.className='verdict show good';
+      verdict.innerHTML = '🎉 <b>Всё верно!</b> Именно так и оформляй в тетради. Прочитай пояснения под карточками — это объяснение каждой строчки.';
+      if (opts.key) NG.store.set('cons:'+opts.key, true);
+      if (opts.onSolved) opts.onSolved();
+    } else {
+      verdict.className='verdict show bad';
+      const parts=[];
+      if (bad) parts.push(`<b class="c-bad">✗ ${bad}</b> — лишние или не в том блоке`);
+      if (pos) parts.push(`<b class="c-warn">↕ ${pos}</b> — верные, но не на своём месте`);
+      if (miss) parts.push(`<b>${miss}</b> — ещё не хватает (остались в карточках)`);
+      verdict.innerHTML = parts.join('<br>') + '<div class="muted" style="margin-top:6px;font-size:13px">Под каждой карточкой — объяснение. Исправь и проверь ещё раз.</div>';
+    }
+  }
+  function hint(){
+    const missG = cards.filter(c=>c.zone==='given'&&c.ok&&!st.given.includes(c.id));
+    const ra = NG.checkAlgo(st.algo, cards);
+    const wrong = st.given.concat(st.algo).find(id=>{ const c=byId[id]; return !c.ok || (st.given.includes(id)&&c.zone!=='given') || (st.algo.includes(id)&&c.zone!=='algo'); });
+    verdict.className='verdict show bad';
+    if (wrong) verdict.innerHTML = `💡 Присмотрись к карточке «${byId[wrong].text}» — она здесь лишняя или не в том блоке.`;
+    else if (missG.length) verdict.innerHTML = `💡 В «Дано» не хватает: «${missG[0].text}».`;
+    else if (ra.missing.length){ const c = ra.missing.slice().sort((a,b)=>a.go-b.go||a.r-b.r)[0]; verdict.innerHTML = `💡 В алгоритме не хватает: «${c.text}».`; }
+    else verdict.innerHTML = '💡 Все нужные карточки на месте — нажми «Проверить», чтобы проверить порядок.';
+  }
+  function showAns(){
+    st.bank = cards.filter(c=>!c.ok).map(c=>c.id);
+    st.given = cards.filter(c=>c.ok&&c.zone==='given').map(c=>c.id);
+    st.algo = NG.checkAlgo([], cards).canon.slice();
+    check();
+    verdict.className='verdict show good';
+    verdict.innerHTML = '👀 Вот правильное оформление. Потом попробуй собрать сам — нажми «Сбросить».';
+  }
+  root.querySelector('.chk').onclick = check;
+  root.querySelector('.hint').onclick = hint;
+  root.querySelector('.show').onclick = showAns;
+  root.querySelector('.rst').onclick = ()=>{ st.bank = shuffle(cards.map(c=>c.id), (opts.key||'k')+Math.random()); st.given=[]; st.algo=[]; st.checked=false; st.marks={}; verdict.className='verdict'; render(); };
+  render();
+  return {root};
+};
+})();
+
+</script>
+<script>
+/* Лёгкий 3D на SVG: угол «комнаты» из П₁, П₂, П₃, вращение пальцем/мышью, виды спереди/сверху/слева.
+   Мировые координаты как в лекции: x — влево, y — к нам, z — вверх. */
+(function(){
+'use strict';
+const NG = window.NG, G = NG.G, fmt = NG.fmt, sv = NG.sv;
+const V3 = {
+  add:(a,b)=>({x:a.x+b.x,y:a.y+b.y,z:a.z+b.z}), sub:(a,b)=>({x:a.x-b.x,y:a.y-b.y,z:a.z-b.z}),
+  mul:(a,k)=>({x:a.x*k,y:a.y*k,z:a.z*k}), len:a=>Math.hypot(a.x,a.y,a.z),
+  norm:a=>{const l=Math.hypot(a.x,a.y,a.z)||1;return {x:a.x/l,y:a.y/l,z:a.z/l};},
+  dot:(a,b)=>a.x*b.x+a.y*b.y+a.z*b.z, lerp:(a,b,t)=>({x:a.x+(b.x-a.x)*t,y:a.y+(b.y-a.y)*t,z:a.z+(b.z-a.z)*t})
+};
+NG.V3 = V3;
+const VIEWS = {iso:[0.72,0.42], front:[0,0], top:[0,Math.PI/2], side:[Math.PI/2,0]};
+
+NG.Scene3D = function(host, opts){
+  const size = opts.size || {x:100,y:60,z:60};
+  const wrap = document.createElement('div'); wrap.className='fig';
+  host.appendChild(wrap);
+  const cap = document.createElement('div'); cap.className='figcap'; cap.textContent = '3D · крути пальцем или мышью'; wrap.appendChild(cap);
+  const svg = sv('svg',{xmlns:'http://www.w3.org/2000/svg',preserveAspectRatio:'xMidYMid meet'},wrap);
+  const C = {x:size.x/2, y:size.y/2, z:size.z/2};
+  const R = Math.hypot(size.x,size.y,size.z)/2 + 8;
+  svg.setAttribute('viewBox', `${-R} ${-R*0.82} ${2*R} ${1.64*R}`);
+  let yaw = VIEWS.iso[0], pitch = VIEWS.iso[1];
+  function P(p){
+    const X = -(p.x - C.x), Y = p.z - C.z, Z = p.y - C.y;
+    const x1 = X*Math.cos(yaw) + Z*Math.sin(yaw), z1 = -X*Math.sin(yaw) + Z*Math.cos(yaw);
+    const y2 = Y*Math.cos(pitch) - z1*Math.sin(pitch), z2 = z1*Math.cos(pitch) + Y*Math.sin(pitch);
+    return [x1, -y2, z2];
+  }
+  const self = {P, V3};
+  function render(){
+    const items = opts.build();
+    const cw = svg.clientWidth || 500;
+    const u = (2*R)/cw;
+    while (svg.firstChild) svg.removeChild(svg.firstChild);
+    const polys = items.filter(i=>i.t==='poly').map(i=>({i, pts:i.pts.map(P)}));
+    polys.forEach(o=>o.d = o.pts.reduce((s,p)=>s+p[2],0)/o.pts.length);
+    polys.sort((a,b)=>a.d-b.d).forEach(o=>{
+      sv('polygon',{points:o.pts.map(p=>p[0]+','+p[1]).join(' '),class:'f-'+(o.i.c||'aux')+' s-'+(o.i.c||'aux'),'fill-opacity':o.i.op==null?.1:o.i.op,'stroke-opacity':o.i.sop==null?.35:o.i.sop,'stroke-width':u},svg);
+    });
+    items.filter(i=>i.t==='seg').forEach(i=>{
+      const a=P(i.a), b=P(i.b);
+      const at={x1:a[0],y1:a[1],x2:b[0],y2:b[1],class:'s-'+(i.c||'txt'),'stroke-width':(i.w||2.2)*u,'stroke-linecap':'round'};
+      if (i.dash) at['stroke-dasharray']=(5*u)+' '+(4*u);
+      if (i.op!=null) at.opacity=i.op;
+      sv('line',at,svg);
+    });
+    items.filter(i=>i.t==='path').forEach(i=>{
+      const pts=i.pts.map(P);
+      sv('polyline',{points:pts.map(p=>p[0]+','+p[1]).join(' '),fill:'none',class:'s-'+(i.c||'txt'),'stroke-width':(i.w||2)*u},svg);
+    });
+    items.filter(i=>i.t==='pt').forEach(i=>{
+      const a=P(i.p);
+      sv('circle',{cx:a[0],cy:a[1],r:(i.r||3.4)*u,class:'f-'+(i.c||'txt')},svg);
+      if (i.n){ const t=sv('text',{x:a[0]+(i.dx||7)*u,y:a[1]+(i.dy||-6)*u,'font-size':(i.size||14)*u,class:'ep-text f-'+(i.c||'txt'),'stroke-width':3*u,'text-anchor':i.anc||'start'},svg); t.textContent=i.n; }
+    });
+    items.filter(i=>i.t==='txt').forEach(i=>{
+      const a=P(i.p);
+      const t=sv('text',{x:a[0],y:a[1],'font-size':(i.size||13)*u,class:'ep-text f-'+(i.c||'txt'),'stroke-width':3*u,'text-anchor':'middle',opacity:i.op==null?1:i.op},svg); t.textContent=i.n;
+    });
+  }
+  self.render = render;
+  let anim = null;
+  self.view = function(name){
+    const [ty,tp] = VIEWS[name]; const y0=yaw, p0=pitch, t0=performance.now();
+    cancelAnimationFrame(anim);
+    const f=t=>{ const k=Math.min(1,(t-t0)/450), q=k<.5?2*k*k:1-Math.pow(-2*k+2,2)/2; yaw=y0+(ty-y0)*q; pitch=p0+(tp-p0)*q; render(); if(k<1) anim=requestAnimationFrame(f); };
+    anim=requestAnimationFrame(f);
+  };
+  let drag=null;
+  svg.addEventListener('pointerdown',e=>{ drag={x:e.clientX,y:e.clientY,yaw,pitch,touch:e.pointerType!=='mouse'}; svg.setPointerCapture&&svg.setPointerCapture(e.pointerId); });
+  svg.addEventListener('pointermove',e=>{ if(!drag) return; yaw = drag.yaw + (e.clientX-drag.x)*0.012; if (!drag.touch) pitch = Math.max(-0.15, Math.min(Math.PI/2, drag.pitch + (e.clientY-drag.y)*0.01)); render(); });
+  const end=()=>{ drag=null; };
+  svg.addEventListener('pointerup',end); svg.addEventListener('pointercancel',end);
+  const bar = document.createElement('div'); bar.className='vbtns';
+  [['iso','3D'],['front','Спереди (П₂)'],['top','Сверху (П₁)'],['side','Слева (П₃)']].forEach(([k,l])=>{ const bt=document.createElement('button'); bt.className='btn sm'; bt.type='button'; bt.textContent=l; bt.onclick=()=>self.view(k); bar.appendChild(bt); });
+  host.appendChild(bar);
+  if (window.ResizeObserver) new ResizeObserver(()=>render()).observe(wrap);
+  render();
+  return self;
+};
+
+/* плоскости проекций и оси */
+NG.room = function(L, W, H, opts){
+  opts = opts||{};
+  const O={x:0,y:0,z:0};
+  const it = [
+    {t:'poly',c:'p1',op:.07,pts:[O,{x:L,y:0,z:0},{x:L,y:W,z:0},{x:0,y:W,z:0}]},
+    {t:'poly',c:'p2',op:.07,pts:[O,{x:L,y:0,z:0},{x:L,y:0,z:H},{x:0,y:0,z:H}]},
+  ];
+  if (!opts.no3) it.push({t:'poly',c:'p3',op:.07,pts:[O,{x:0,y:W,z:0},{x:0,y:W,z:H},{x:0,y:0,z:H}]});
+  it.push({t:'seg',a:O,b:{x:L+6,y:0,z:0},c:'axis',w:1.3},{t:'seg',a:O,b:{x:0,y:W+6,z:0},c:'axis',w:1.3},{t:'seg',a:O,b:{x:0,y:0,z:H+6},c:'axis',w:1.3});
+  it.push({t:'txt',p:{x:L+10,y:0,z:0},n:'x',c:'axis'},{t:'txt',p:{x:0,y:W+10,z:0},n:'y',c:'axis'},{t:'txt',p:{x:0,y:0,z:H+10},n:'z',c:'axis'},{t:'txt',p:{x:-3,y:-3,z:-3},n:'O',c:'axis',size:12});
+  it.push({t:'txt',p:{x:L*0.85,y:W*0.85,z:0},n:'П₁',c:'p1',size:15,op:.9},{t:'txt',p:{x:L*0.85,y:0,z:H*0.85},n:'П₂',c:'p2',size:15,op:.9});
+  if (!opts.no3) it.push({t:'txt',p:{x:0,y:W*0.8,z:H*0.85},n:'П₃',c:'p3',size:15,op:.9});
+  return it;
+};
+
+/* ============ виджет: точка и её проекции ============ */
+NG.widgetPoint = function(host){
+  const st = {x:55,y:30,z:40};
+  host.innerHTML = `<div class="v3d"><div class="w3"></div><div><div class="w2"></div></div></div>
+    <div class="card" style="margin-top:10px">
+      <div class="slider">x (широта) <input type="range" min="5" max="90" value="55" data-k="x"><b></b></div>
+      <div class="slider">y (глубина) <input type="range" min="0" max="50" value="30" data-k="y"><b></b></div>
+      <div class="slider">z (высота) <input type="range" min="0" max="50" value="40" data-k="z"><b></b></div>
+      <div class="pt-read muted" style="font-size:14px"></div>
+    </div>`;
+  const A = ()=>({x:st.x,y:st.y,z:st.z});
+  const sc = NG.Scene3D(host.querySelector('.w3'), {size:{x:100,y:60,z:60}, build(){
+    const a=A(), a1={x:a.x,y:a.y,z:0}, a2={x:a.x,y:0,z:a.z}, a3={x:0,y:a.y,z:a.z};
+    return NG.room(100,60,60).concat([
+      {t:'seg',a:a,b:a1,c:'p1',dash:true,w:1.5},{t:'seg',a:a,b:a2,c:'p2',dash:true,w:1.5},{t:'seg',a:a,b:a3,c:'p3',dash:true,w:1.5},
+      {t:'seg',a:a1,b:{x:a.x,y:0,z:0},c:'aux',w:1,op:.7},{t:'seg',a:a1,b:{x:0,y:a.y,z:0},c:'aux',w:1,op:.7},
+      {t:'seg',a:a2,b:{x:a.x,y:0,z:0},c:'aux',w:1,op:.7},{t:'seg',a:a2,b:{x:0,y:0,z:a.z},c:'aux',w:1,op:.7},
+      {t:'seg',a:a3,b:{x:0,y:a.y,z:0},c:'aux',w:1,op:.7},{t:'seg',a:a3,b:{x:0,y:0,z:a.z},c:'aux',w:1,op:.7},
+      {t:'pt',p:a,n:'A',c:'txt',r:4},{t:'pt',p:a1,n:'A₁',c:'p1'},{t:'pt',p:a2,n:'A₂',c:'p2'},{t:'pt',p:a3,n:'A₃',c:'p3'}
+    ]);
+  }});
+  const h2 = host.querySelector('.w2');
+  function epure(){
+    h2.innerHTML='';
+    const a=A();
+    const p1=[-a.x,a.y], p2=[-a.x,-a.z], p3=[a.y,-a.z], k=[a.y,a.y];
+    const els = NG.U.axesEls([{x:90,y:50,z:50},{x:5,y:0,z:0}], true).concat([
+      {t:'seg',a:p1,b:p2,c:'link',w:'link'},{t:'seg',a:p2,b:p3,c:'link',w:'link'},
+      {t:'seg',a:p1,b:k,c:'aux',w:'aux'},{t:'seg',a:k,b:p3,c:'aux',w:'aux'},
+      {t:'dim',a:[0,-3],b:[-a.x,-3],c:'p3',n:'x',side:-1,size:12},
+      {t:'dim',a:[-a.x-3,0],b:[-a.x-3,a.y],c:'p2',n:'y',side:-1,size:12},
+      {t:'dim',a:[-a.x-3,0],b:[-a.x-3,-a.z],c:'p1',n:'z',side:1,size:12},
+      {t:'pt',p:p2,n:'A₂',c:'p2',lp:[1,-1]},{t:'pt',p:p1,n:'A₁',c:'p1',lp:[1,1]},{t:'pt',p:p3,n:'A₃',c:'p3',lp:[1,-1]}
+    ]);
+    const f = NG.Fig(h2,{els, pad:8});
+    f.wrap.insertAdjacentHTML('beforeend','<div class="figcap">ЭПЮР (КЧ)</div>');
+    host.querySelector('.pt-read').innerHTML = `A(${a.x}; ${a.y}; ${a.z}) → <b class="c-p1">A₁(${a.x}; ${a.y})</b> — без z, <b class="c-p2">A₂(${a.x}; ${a.z})</b> — без y, <b class="c-p3">A₃(${a.y}; ${a.z})</b> — без x. Каждая проекция теряет одну координату, поэтому одной проекции мало, двух — достаточно.`;
+  }
+  let raf=0;
+  host.querySelectorAll('input[type=range]').forEach(inp=>{
+    const out = inp.parentNode.querySelector('b');
+    const upd=()=>{ st[inp.dataset.k]=+inp.value; out.textContent=inp.value+' мм'; cancelAnimationFrame(raf); raf=requestAnimationFrame(()=>{ sc.render(); epure(); }); };
+    inp.addEventListener('input',upd); out.textContent=inp.value+' мм';
+  });
+  epure();
+};
+
+/* ============ виджет: лаборатория типов прямых ============ */
+NG.widgetLineLab = function(host){
+  let type='ga', seg=NG.randSeg('ga', NG.rng('lab-ga'));
+  host.innerHTML = `<div class="types9"></div><div class="v3d"><div class="w3"></div><div class="w2"></div></div><div class="card lab-info"></div>`;
+  const tb = host.querySelector('.types9');
+  NG.TYPE_ORDER.forEach(k=>{ const bt=document.createElement('button'); bt.type='button'; bt.className='btn sm'; bt.dataset.k=k; bt.textContent=NG.TYPES[k].icon+' '+NG.TYPES[k].name; bt.onclick=()=>{ type=k; seg=NG.randSeg(k, NG.rng('lab-'+k)); upd(); }; tb.appendChild(bt); });
+  const more=document.createElement('button'); more.type='button'; more.className='btn sm pri'; more.textContent='🎲 другой пример'; more.onclick=()=>{ seg=NG.randSeg(type); upd(); }; tb.appendChild(more);
+  const sc = NG.Scene3D(host.querySelector('.w3'), {size:{x:100,y:60,z:60}, build(){
+    const {A,B}=seg;
+    const pr=(P,k)=>k===1?{x:P.x,y:P.y,z:0}:k===2?{x:P.x,y:0,z:P.z}:{x:0,y:P.y,z:P.z};
+    const it = NG.room(100,60,60);
+    [1,2,3].forEach(k=>{ const c='p'+k; it.push({t:'seg',a:A,b:pr(A,k),c,dash:true,w:1,op:.6},{t:'seg',a:B,b:pr(B,k),c,dash:true,w:1,op:.6},{t:'seg',a:pr(A,k),b:pr(B,k),c,w:2.6}); });
+    it.push({t:'seg',a:A,b:B,c:'txt',w:3.2},{t:'pt',p:A,n:'A',c:'txt'},{t:'pt',p:B,n:'B',c:'txt'});
+    return it;
+  }});
+  const h2 = host.querySelector('.w2');
+  function upd(){
+    tb.querySelectorAll('button[data-k]').forEach(b=>b.classList.toggle('pri', b.dataset.k===type));
+    sc.render();
+    h2.innerHTML='';
+    const {A,B}=seg;
+    const base = NG.U.baseScene({A,B,axes:true,show3:true});
+    const S=base.S, els=base.els.slice();
+    if (G.dist(S.a3,S.b3)>0.5) els.push({t:'seg',a:S.a3,b:S.b3,c:'p3'});
+    [[A,S.a1,S.a2,S.a3],[B,S.b1,S.b2,S.b3]].forEach(([P,p1,p2,p3])=>{ els.push({t:'seg',a:p2,b:p3,c:'link',w:'link'},{t:'seg',a:p1,b:[P.y,P.y],c:'link',w:'link'},{t:'seg',a:[P.y,P.y],b:p3,c:'link',w:'link'}); });
+    els.push(...NG.U.mergePts([{p:S.a3,n:'A₃',c:'p3',others:[S.b3,S.a2]},{p:S.b3,n:'B₃',c:'p3',others:[S.a3,S.b2]}]));
+    const f = NG.Fig(h2,{els, pad:8});
+    f.wrap.insertAdjacentHTML('beforeend','<div class="figcap">ЭПЮР (КЧ)</div>');
+    const T = NG.TYPES[type], M = NG.measure(A,B);
+    host.querySelector('.lab-info').innerHTML = `<h4>${T.name}</h4><p><b>Как узнать на КЧ:</b> ${T.sign}</p><p><b>Натуральная величина:</b> ${T.nv}.</p><p><b>Свойства (пиши на зачёте):</b></p><ul class="clean">${T.props.map(p=>`<li>${p}</li>`).join('')}</ul><p class="mono muted" style="font-size:13px">A(${A.x}; ${A.y}; ${A.z}), B(${B.x}; ${B.y}; ${B.z}) · |AB| ≈ ${fmt(M.NV)} · α ≈ ${fmt(M.a,0)}°, β ≈ ${fmt(M.b,0)}°, γ ≈ ${fmt(M.g,0)}°</p>`;
+  }
+  upd();
+};
+
+/* ============ виджет: почему работает метод прямоугольного треугольника ============ */
+NG.widgetTri3D = function(host){
+  const A={x:72,y:14,z:46}, B={x:22,y:40,z:16};
+  const A1={x:A.x,y:A.y,z:0}, B1={x:B.x,y:B.y,z:0}, K={x:A.x,y:A.y,z:B.z};
+  const dz = A.z-B.z;
+  const u = V3.norm(V3.sub(A1,B1));
+  let n = {x:-u.y, y:u.x, z:0}; if (n.y<0) n = V3.mul(n,-1);
+  let t = 0;
+  host.innerHTML = `<div class="w3"></div><div class="card" style="margin-top:10px"><div class="slider">Уложить треугольник на П₁ <input type="range" min="0" max="100" value="0"><b>0%</b></div><div class="tri-txt" style="font-size:15px"></div></div>`;
+  const sc = NG.Scene3D(host.querySelector('.w3'), {size:{x:100,y:60,z:60}, build(){
+    const it = NG.room(100,60,60,{no3:true});
+    it.push({t:'seg',a:A,b:A1,c:'aux',dash:true,w:1.2},{t:'seg',a:B,b:B1,c:'aux',dash:true,w:1.2},{t:'seg',a:A1,b:B1,c:'p1',w:3},
+      {t:'pt',p:A1,n:'A₁',c:'p1',dx:-8,anc:'end'},{t:'pt',p:B1,n:'B₁',c:'p1'});
+    const s = Math.min(1,t/0.5), psi = Math.max(0,(t-0.5)/0.5)*Math.PI/2;
+    const down = {x:0,y:0,z:-B.z*s};
+    let Aq = V3.add(A,down), Kq = V3.add(K,down), Bq = V3.add(B,down);
+    if (t>0.5){ Aq = V3.add(A1, V3.add(V3.mul({x:0,y:0,z:1}, dz*Math.cos(psi)), V3.mul(n, dz*Math.sin(psi)))); Kq = A1; Bq = B1; }
+    it.push({t:'poly',c:'nv',op:.16,sop:.0,pts:[Aq,Kq,Bq]});
+    if (t>0.02){ it.push({t:'seg',a:A,b:B,c:'txt',w:1.4,op:.35},{t:'seg',a:A,b:K,c:'dd',w:1.2,op:.35}); }
+    it.push({t:'seg',a:Kq,b:Bq,c:'p1',w:2,dash:true},{t:'seg',a:Aq,b:Kq,c:'dd',w:3},{t:'seg',a:Aq,b:Bq,c:'nv',w:3.2});
+    const e1 = V3.norm(V3.sub(Kq,Bq)), w = V3.sub(Aq,Bq); const e2 = V3.norm(V3.sub(w, V3.mul(e1, V3.dot(w,e1))));
+    const al = Math.atan2(dz, V3.len(V3.sub(A1,B1)));
+    const arc=[]; for(let i=0;i<=12;i++){ const q=al*i/12; arc.push(V3.add(Bq, V3.add(V3.mul(e1,9*Math.cos(q)), V3.mul(e2,9*Math.sin(q))))); }
+    it.push({t:'path',pts:arc,c:'ang',w:2.2});
+    it.push({t:'pt',p:Aq,n:t>=0.99?'A₀':'A',c:'nv'},{t:'pt',p:Bq,n:t<0.49?'B':'',c:'txt'},{t:'txt',p:V3.add(Bq,V3.add(V3.mul(e1,15*Math.cos(al/2)),V3.mul(e2,15*Math.sin(al/2)))),n:'α',c:'ang',size:14});
+    return it;
+  }});
+  const txt = host.querySelector('.tri-txt');
+  function say(){
+    txt.innerHTML = t<0.05 ? `Отрезок <b>AB</b> висит в пространстве, его проекция на пол — <b class="c-p1">A₁B₁</b>. Проведём через B линию, параллельную A₁B₁. Получился <b>прямоугольный треугольник</b>: катет ∥ A₁B₁ (той же длины), вертикальный катет <b class="c-dd">Δz</b> — насколько A выше B, гипотенуза — сам отрезок <b class="c-nv">AB</b>. Угол при B — это угол наклона AB к полу, <b class="c-ang">α</b>.`
+      : t<0.5 ? `Опускаем треугольник вниз: катет садится ровно на <b class="c-p1">A₁B₁</b>, а <b class="c-dd">Δz</b> встаёт вертикально над A₁.`
+      : t<0.99 ? `Поворачиваем треугольник вокруг A₁B₁, пока он не ляжет на пол — ничего не растягивается, длины и углы сохраняются.`
+      : `Лёг! На чертеже это выглядит так: <b class="c-dd">Δz</b> отложен <b>перпендикулярно</b> A₁B₁ из точки A₁ → точка <b>A₀</b>. <b class="c-nv">A₀B₁ = |AB|</b> — натуральная величина, <b class="c-ang">∠A₁B₁A₀ = α</b>. Это и есть метод прямоугольного треугольника.`;
+  }
+  const inp = host.querySelector('input'), out=host.querySelector('.slider b');
+  inp.addEventListener('input',()=>{ t=inp.value/100; out.textContent=inp.value+'%'; sc.render(); say(); });
+  say();
+};
+})();
+
+</script>
+<script>
+/* Данные: ДЗ (снято с фото листа), задачи для нарешки, карточки самопроверки, карта темы. */
+(function(){
+'use strict';
+const NG = window.NG;
+
+/* ДЗ: координаты точек сняты с фото в пикселях (X, Yf — фронтальная, Yh — горизонтальная).
+   1 px фото ≈ 0,5 мм. Скрытая ось x проходит на высоте Y0 — на безосном чертеже она не рисуется. */
+const K = 0.5;
+function hwPt(p, Y0){ return {x:(600-p.X)*K, z:p.Yf!=null?(Y0-p.Yf)*K:0, y:p.Yh!=null?(p.Yh-Y0)*K:0}; }
+function hw(d){
+  const ys = [d.A.Yf,d.B.Yf,d.A.Yh,d.B.Yh].filter(v=>v!=null);
+  const Y0 = (Math.min(...ys)+Math.max(...ys))/2;
+  const o = Object.assign({}, d, {A:hwPt(d.A,Y0), B:hwPt(d.B,Y0), axes:false});
+  if (d.link) o.links = [{p:d.link.p, y0:(d.link.y0-Y0)*K, y1:(d.link.y1-Y0)*K}];
+  return o;
+}
+
+const HWNOTE = '<div class="idea warn">Длины в разборе сняты с фото листа (примерно). На твоём листе миллиметры будут другими — меряй свои. <b>Углы от масштаба не зависят</b>: у тебя должно выйти так же, ±2–3°.</div>';
+
+NG.HW = [
+  hw({id:'1-03', mine:true, find:[1,2], A:{X:470,Yf:74,Yh:165}, B:{X:470,Yf:151,Yh:203},
+    q:'Определить НВ отрезка AB и углы наклона к П₁ и П₂.',
+    note:'<div class="idea exam"><b>Это твой вариант.</b> Всё как в задаче про [CD] с практики: профильная прямая → γ = 0°, α и β — двумя треугольниками. Заметь: оба треугольника одинаковые (катеты |A₁B₁| и |A₂B₂|), просто углы смотрим при разных вершинах — поэтому α + β = 90°.</div>'}),
+  hw({id:'1-01', find:[2,3], A:{X:44,Yf:112,Yh:132}, B:{X:178,Yf:84,Yh:183}, q:'Определить НВ отрезка AB и углы наклона к П₂ и П₃.'}),
+  hw({id:'1-02', find:[1,3], A:{X:244,Yf:153,Yh:188}, B:{X:367,Yf:67,Yh:159}, q:'Определить НВ отрезка AB и углы наклона к П₁ и П₃.'}),
+  hw({id:'1-04', find:[1,2], A:{X:55,Yf:224,Yh:248}, B:{X:183,Yf:262,Yh:325}, q:'Определить НВ отрезка AB и углы наклона к П₁ и П₂.'}),
+  hw({id:'1-05', find:[1,3], A:{X:248,Yf:235,Yh:337}, B:{X:370,Yf:284,Yh:308}, q:'Определить НВ отрезка AB и углы наклона к П₁ и П₃.'}),
+  hw({id:'1-06', find:[1,2], A:{X:470,Yf:230,Yh:358}, B:{X:470,Yf:282,Yh:296}, q:'Определить НВ отрезка AB и углы наклона к П₁ и П₂.', note:'<div class="idea">Близнец твоего 1-03: тоже профильная прямая, только B₁ выше A₁.</div>'}),
+  hw({id:'1-07', find:[2,3], A:{X:73,Yf:429,Yh:499}, B:{X:176.5,Yf:523,Yh:553}, q:'Определить НВ отрезка AB и углы наклона к П₂ и П₃.', note:'<div class="idea">Не пугайся, что A₁ выше B₂: на безосном чертеже проекции могут «перекрываться». Работаем только с разностями — они от этого не меняются.</div>'}),
+  hw({id:'1-08', find:[2,3], A:{X:263,Yf:497,Yh:497}, B:{X:368.5,Yf:430,Yh:530}, q:'Определить НВ отрезка AB и углы наклона к П₂ и П₃.', note:'<div class="idea">A₁ ≡ A₂ — просто совпали две проекции точки A (как будто ось x проходит через A). На решение это не влияет.</div>'}),
+  hw({id:'1-09', find:[1,2], A:{X:466,Yf:428,Yh:512}, B:{X:466,Yf:512,Yh:552}, q:'Определить НВ отрезка AB и углы наклона к П₁ и П₂.', note:'<div class="idea">B₂ ≡ A₁ — совпадение, не ошибка. Прямая профильная: всё на одной линии связи.</div>'}),
+  hw({id:'1-10', find:[1,3], A:{X:84,Yf:646,Yh:703}, B:{X:180,Yf:616,Yh:636}, q:'Определить НВ отрезка AB и углы наклона к П₁ и П₃.'}),
+  hw({id:'1-11', find:[1,3], A:{X:266,Yf:597,Yh:692}, B:{X:372,Yf:626,Yh:626}, q:'Определить НВ отрезка AB и углы наклона к П₁ и П₃.', note:'<div class="idea">B₂ ≡ B₁ — совпали проекции точки B. Прямая всё равно общего положения.</div>'}),
+  hw({id:'1-12', find:[1,2], A:{X:468,Yf:597,Yh:713}, B:{X:468,Yf:643,Yh:643}, q:'Определить НВ отрезка AB и углы наклона к П₁ и П₂.', note:'<div class="idea">Профильная прямая, B₂ ≡ B₁.</div>'}),
+  hw({id:'1-13', rev:true, given:['A1','B1','A2'], unknown:'B2', aplane:1, val:30, A:{X:75.5,Yf:825,Yh:897}, B:{X:174,Yh:852}, link:{p:'B',y0:782,y1:852},
+    q:'Построить недостающую проекцию отрезка AB, если α = ∠(AB, П₁) = 30°. Сколько решений?'}),
+  hw({id:'1-14', rev:true, given:['A2','B2','A1'], unknown:'B1', aplane:2, val:45, A:{X:209.5,Yf:822,Yh:855}, B:{X:309,Yf:786}, link:{p:'B',y0:786,y1:880},
+    q:'Построить недостающую проекцию отрезка AB, если β = ∠(AB, П₂) = 45°. Сколько решений?', note:'<div class="idea">При 45° треугольник равнобедренный: Δy = |A₂B₂|. Можно даже без транспортира.</div>'}),
+  hw({id:'1-15', rev:true, given:['A1','B1','A2'], unknown:'B2', aplane:2, val:30, A:{X:345,Yf:817,Yh:893}, B:{X:441,Yh:832}, link:{p:'B',y0:782,y1:832},
+    q:'Построить недостающую проекцию отрезка AB, если β = ∠(AB, П₂) = 30°. Сколько решений?', note:'<div class="idea warn">Самая хитрая задача листа: угол к П₂, а целиком дана горизонтальная проекция. На фото радиус лишь чуть больше расстояния до линии связи — проверь циркулем на своём листе.</div>'}),
+  hw({id:'1-16', rev:true, given:['A2','B2','B1'], unknown:'A1', aplane:1, val:30, A:{X:474,Yf:787}, B:{X:571,Yf:836,Yh:882}, link:{p:'A',y0:787,y1:892},
+    q:'Построить недостающую проекцию отрезка AB, если α = ∠(AB, П₁) = 30°. Сколько решений?', note:'<div class="idea warn">По пропорциям фото дуга не достаёт до линии связи — решений нет. Это возможно: задача специально спрашивает «сколько решений». Но фото искажено, поэтому <b>обязательно проверь на своём листе</b>: нужный радиус = 1,73·Δz. Если он больше расстояния между линиями связи — 2 решения, равен — 1, меньше — 0.</div>'})
+];
+NG.HW.forEach(t=>{ t.note = (t.note||'') + (t.rev ? '' : HWNOTE); });
+
+/* Нарешка: НВ и углы (с осями, координаты в мм) */
+NG.PRAC_NV = [
+  {id:'n1', lvl:1, title:'Разминка: α и β', A:{x:70,y:10,z:15}, B:{x:25,y:35,z:45}, find:[1,2]},
+  {id:'n2', lvl:2, title:'Все три угла (как задача 1 с практики)', A:{x:80,y:40,z:10}, B:{x:30,y:15,z:35}, find:[1,2,3]},
+  {id:'n3', lvl:1, title:'Только α', A:{x:75,y:15,z:40}, B:{x:20,y:40,z:10}, find:[1]},
+  {id:'n4', lvl:1, title:'Только β', A:{x:65,y:45,z:30}, B:{x:15,y:10,z:20}, find:[2]},
+  {id:'n5', lvl:2, title:'Профильная прямая (как [CD] с практики)', A:{x:60,y:30,z:40}, B:{x:60,y:10,z:10}, find:[1,2]},
+  {id:'n6', lvl:1, title:'Ловушка: горизонталь', A:{x:75,y:20,z:25}, B:{x:20,y:45,z:25}, find:[1,2]},
+  {id:'n7', lvl:1, title:'Ловушка: фронталь', A:{x:70,y:25,z:10}, B:{x:25,y:25,z:40}, find:[1,2]},
+  {id:'n8', lvl:1, title:'Ловушка: проекция-точка', A:{x:55,y:15,z:35}, B:{x:55,y:40,z:35}, find:[1,2]},
+  {id:'n9', lvl:2, title:'Только γ (нужна профильная проекция)', A:{x:85,y:10,z:20}, B:{x:35,y:35,z:50}, find:[3]},
+  {id:'n10', lvl:3, title:'Все три угла, нисходящая', A:{x:70,y:35,z:45}, B:{x:15,y:5,z:15}, find:[1,2,3]},
+  {id:'n11', lvl:3, title:'Безосный, как в ДЗ: α и γ', A:{x:75,y:30,z:15}, B:{x:20,y:10,z:40}, find:[1,3], axes:false},
+  {id:'n12', lvl:2, title:'Горизонталь: β и γ', A:{x:80,y:12,z:30}, B:{x:30,y:40,z:30}, find:[2,3]}
+];
+NG.PRAC_NV.forEach(p=>{ if (p.axes==null) p.axes = true; p.coords = true; });
+
+/* Нарешка: обратные задачи */
+NG.PRAC_REV = [
+  {id:'r1', title:'По натуральной величине (как задача 3 с практики)', A:{x:60,y:20,z:15}, B:{x:40,y:0,z:30}, given:['A2','B2','A1'], unknown:'B1', aplane:'nv', val:30, ctext:'A(60; 20; 15), B(40; ?; 30), |AB| = 30 мм'},
+  {id:'r2', title:'По углу α (как задача 4 с практики)', A:{x:70,y:30,z:35}, B:{x:40,y:10,z:0}, given:['A1','B1','A2'], unknown:'B2', aplane:1, val:30, ctext:'A(70; 30; 35), B(40; 10; ?), α = 30°'},
+  {id:'r3', title:'По углу β', A:{x:75,y:30,z:20}, B:{x:40,y:0,z:40}, given:['A2','B2','A1'], unknown:'B1', aplane:2, val:30, ctext:'A(75; 30; 20), B(40; ?; 40), β = 30°'},
+  {id:'r4', title:'Хитрая: β, а дана горизонтальная (как 1-15)', A:{x:70,y:40,z:35}, B:{x:40,y:15,z:0}, given:['A1','B1','A2'], unknown:'B2', aplane:2, val:30, ctext:'A(70; 40; 35), B(40; 15; ?), β = 30°'},
+  {id:'r5', title:'Хитрая: α, а дана фронтальная (как 1-16)', A:{x:75,y:0,z:45}, B:{x:40,y:30,z:20}, given:['A2','B2','B1'], unknown:'A1', aplane:1, val:30, ctext:'A(75; ?; 45), B(40; 30; 20), α = 30°'},
+  {id:'r6', title:'А если решений нет?', A:{x:75,y:0,z:30}, B:{x:40,y:25,z:15}, given:['A2','B2','B1'], unknown:'A1', aplane:1, val:45, ctext:'A(75; ?; 30), B(40; 25; 15), α = 45°'},
+  {id:'r7', title:'По НВ, недостающая фронтальная', A:{x:70,y:35,z:30}, B:{x:35,y:15,z:0}, given:['A1','B1','A2'], unknown:'B2', aplane:'nv', val:50, ctext:'A(70; 35; 30), B(35; 15; ?), |AB| = 50 мм'}
+];
+NG.PRAC_REV.forEach(p=>{ p.axes = true; p.coords = true; });
+
+NG.PRAC_TRI = [
+  {id:'t1', title:'Треугольник: наименьшая сторона (как задача 5 с практики)', A:{x:80,y:10,z:15}, B:{x:45,y:40,z:45}, C:{x:15,y:20,z:25}},
+  {id:'t2', title:'Треугольник со стороной-горизонталью', A:{x:75,y:15,z:20}, B:{x:48,y:40,z:45}, C:{x:20,y:30,z:20}}
+];
+
+NG.FLASH = [
+  ['Чем центральное проецирование отличается от параллельного?','Центральное — все лучи выходят из одной точки S (как лампочка). Параллельное — лучи параллельны (как солнце, S «в бесконечности»).'],
+  ['Какое проецирование используют для чертежей?','Прямоугольное (ортогональное): лучи падают на плоскость под 90°.'],
+  ['Когда отрезок проецируется в натуральную величину?','Когда он параллелен плоскости проекций. Иначе проекция короче: |GH|·cos(угла).'],
+  ['Когда прямая проецируется в точку?','Когда она параллельна направлению проецирования (при прямоугольном — перпендикулярна плоскости).'],
+  ['Почему одной проекции точки мало?','На одном проецирующем луче бесконечно много точек — все дают одну проекцию.'],
+  ['Какие координаты у A₁, A₂, A₃?','A₁(x; y) — без высоты, A₂(x; z) — без глубины, A₃(y; z) — без широты.'],
+  ['Что такое линия связи?','Линия между проекциями одной точки. A₁A₂ ⊥ Ox, A₂A₃ ⊥ Oz.'],
+  ['Почему ось y на эпюре пишут дважды?','При развороте она уходит и вместе с П₁ (вниз), и вместе с П₃ (вправо): y и y′.'],
+  ['Как по КЧ узнать горизонталь?','A₂B₂ ∥ Ox. НВ на П₁ (|A₁B₁| = |AB|), α = 0°, угол A₁B₁ с Ox = β.'],
+  ['Как по КЧ узнать фронталь?','A₁B₁ ∥ Ox. НВ на П₂ (|A₂B₂| = |AB|), β = 0°, угол A₂B₂ с Ox = α.'],
+  ['Как узнать профильную прямую?','Обе проекции на одной вертикальной линии связи (⊥ Ox). НВ на П₃, γ = 0°, α + β = 90°.'],
+  ['Фронтальная проекция — точка. Что за прямая?','Фронтально-проецирующая (⊥ П₂). НВ на П₁ и П₃, β = 90°, α = γ = 0°.'],
+  ['Что такое катеты в методе прямоугольного треугольника?','I катет — проекция отрезка. II катет — разность расстояний концов отрезка до этой же плоскости проекций.'],
+  ['Какой Δ берём для α, β, γ?','Ту координату, которой НЕТ у проекции: на П₁ (x,y) → Δz → α; на П₂ (x,z) → Δy → β; на П₃ (y,z) → Δx → γ.'],
+  ['Где на треугольнике угол наклона?','Между проекцией (I катет) и гипотенузой.'],
+  ['Откуда брать Δz?','С фронтальной проекции — разница высот A₂ и B₂ по вертикали.'],
+  ['Откуда брать Δy?','С горизонтальной проекции — разница A₁ и B₁ по вертикали.'],
+  ['Откуда брать Δx?','Расстояние между линиями связи точек A и B по горизонтали.'],
+  ['Восходящая или нисходящая?','Удаляясь от наблюдателя (y уменьшается) поднимается — восходящая; опускается — нисходящая. На КЧ: проекции наклонены в одну сторону — восходящая, в разные — нисходящая.'],
+  ['Сколько решений у задачи «недостающая проекция по углу»?','Если треугольник строится на данной проекции — 2 (Δ вверх или вниз). Если через окружность — 2, 1 или 0.'],
+  ['Как проверить ответ?','НВ больше любой проекции; α + β ≤ 90° (у профильной = 90°); sin²α + sin²β + sin²γ = 1.'],
+  ['Шесть способов задать плоскость?','3 точки не на прямой; прямая и точка; две параллельные прямые; две пересекающиеся прямые; плоская фигура; следы.'],
+  ['Что такое след плоскости?','Линия пересечения плоскости с плоскостью проекций (h₀ — с П₁, f₀ — с П₂).'],
+  ['Проецирующая плоскость или плоскость уровня?','Проецирующая ⊥ одной плоскости проекций (видна на ней линией). Уровня ∥ одной (там всё в НВ) и ⊥ двум другим.']
+];
+
+NG.MAP = [
+  {id:'m1', n:'01', t:'Проецирование', s:'«тень» предмета на плоскость', to:'proj',
+    d:'<b>Что это:</b> строим изображение предмета лучами. <b>Откуда:</b> лист двумерный, а предмет трёхмерный — нужно правило переноса. <b>Что даёт дальше:</b> прямоугольное проецирование и 9 свойств — главное из них: <i>отрезок ∥ плоскости → натуральная величина</i>, <i>прямая ∥ лучам → точка</i>.'},
+  {id:'m2', n:'02', t:'Три плоскости П₁ П₂ П₃', s:'пол, передняя стена, боковая стена', to:'point',
+    d:'<b>Откуда:</b> одна проекция не определяет точку, поэтому берём 2–3 взаимно перпендикулярные плоскости. <b>Что даёт:</b> оси x, y, z и три проекции каждой точки.'},
+  {id:'m3', n:'03', t:'Точка: x, y, z', s:'широта, глубина, высота', to:'point',
+    d:'<b>Главное:</b> A₁ = (x; y), A₂ = (x; z), A₃ = (y; z). Каждая проекция «теряет» одну координату. <b>Что даёт:</b> Δx, Δy, Δz — разности координат, из них и строится треугольник.'},
+  {id:'m4', n:'04', t:'Эпюр Монжа (КЧ)', s:'плоскости разложили в одну', to:'point',
+    d:'<b>Откуда:</b> П₁ повернули вниз, П₃ — вправо. <b>Правила:</b> A₁A₂ ⊥ Ox, A₂A₃ ⊥ Oz; по двум проекциям строим третью через линию 45°.'},
+  {id:'m5', n:'05', t:'Прямая = 2 точки', s:'соединяем одноимённые проекции', to:'line',
+    d:'<b>Откуда:</b> аксиома «через 2 точки — одна прямая». Поэтому всё, что знаем про точки, работает и для прямой.'},
+  {id:'m6', n:'06', t:'Положение прямой', s:'общего · уровня · проецирующие', to:'line', exam:true,
+    d:'<b>Задача 1 на зачёте.</b> Смотрим на проекции: точка → проецирующая; ∥ оси x → уровня; на одной линии связи → профильная; иначе — общего положения. Потом пишем свойства.'},
+  {id:'m7', n:'07', t:'Где натуральная величина?', s:'на КЧ её видно не всегда', to:'line',
+    d:'<b>Уровня</b> — на плоскости, которой прямая ∥. <b>Проецирующая</b> — на двух плоскостях. <b>Общего положения</b> — нигде → нужен метод прямоугольного треугольника.'},
+  {id:'m8', n:'08', t:'Метод прямоугольного треугольника', s:'катеты: проекция и Δ', to:'tri', exam:true,
+    d:'<b>Задача 2 на зачёте и РЗ.</b> I катет — проекция, II катет — Δ той координаты, которой у проекции нет. Гипотенуза = НВ, угол между проекцией и гипотенузой = угол наклона.'},
+  {id:'m9', n:'09', t:'Углы α, β, γ', s:'наклон к П₁, П₂, П₃', to:'tri',
+    d:'α — через П₁ и Δz, β — через П₂ и Δy, γ — через П₃ и Δx. Проверка: α + β ≤ 90°.'},
+  {id:'m10', n:'10', t:'Обратные задачи', s:'найти проекцию по углу или НВ', to:'rev',
+    d:'Тот же треугольник, только наоборот: знаем угол или НВ → находим Δ → откладываем на линии связи. Обычно 2 решения (1-13…1-16 в ДЗ).'},
+  {id:'m11', n:'11', t:'Плоскость (лекция 3)', s:'способы задания, следы, виды', to:'plane',
+    d:'Та же логика, что у прямых: общего положения, проецирующие (⊥), уровня (∥). Для зачёта по КР — фон, но спросить могут.'},
+  {id:'m12', n:'🎯', t:'Зачёт', s:'КР: 2 задачи + РЗ', to:'exam', goal:true,
+    d:'<b>Задача 1:</b> дан КЧ прямой — определить положение и описать свойства. <b>Задача 2:</b> метод прямоугольного треугольника. <b>РЗ</b> — тоже метод прямоугольного треугольника. Всё это тренируется в «Нарешке» и «Пробном зачёте».'}
+];
+})();
+
+</script>
+<script>
+/* Сборка страницы: навигация, прогресс, виджеты, задачи, тренажёр, пробный зачёт. */
+(function(){
+'use strict';
+const NG = window.NG, G = NG.G, fmt = NG.fmt;
+const {ANG, PL} = NG.K;
+const $ = (s,r)=>(r||document).querySelector(s);
+const $$ = (s,r)=>[...(r||document).querySelectorAll(s)];
+const h = (tag, cls, html)=>{ const e=document.createElement(tag); if (cls) e.className=cls; if (html!=null) e.innerHTML=html; return e; };
+const clone = o=>JSON.parse(JSON.stringify(o));
+
+/* ---------- тема, меню ---------- */
+$('.themebtn').onclick = ()=>{ const l = document.documentElement.classList.toggle('light'); NG.store.set('theme', l?'light':'dark'); };
+$('.navbtn').onclick = ()=>document.body.classList.toggle('navopen');
+$('.navshade').onclick = ()=>document.body.classList.remove('navopen');
+$$('.toc a').forEach(a=>a.addEventListener('click',()=>document.body.classList.remove('navopen')));
+const secs = $$('main .sec');
+if (window.IntersectionObserver){
+  const io = new IntersectionObserver(es=>es.forEach(e=>{ if (e.isIntersecting){ $$('.toc a.ti').forEach(a=>a.classList.toggle('on', a.getAttribute('href')==='#'+e.target.id)); } }), {rootMargin:'-45% 0px -50% 0px'});
+  secs.forEach(s=>io.observe(s));
+}
+
+/* ---------- прогресс ---------- */
+const ALL = [].concat(NG.HW.map(t=>'hw'+t.id), NG.PRAC_NV.map(t=>t.id), NG.PRAC_REV.map(t=>t.id), NG.PRAC_TRI.map(t=>t.id));
+function progress(){
+  const n = ALL.filter(id=>NG.store.get('done:'+id,false)).length;
+  $('.prog-n').textContent = n; $('.prog-t').textContent = ALL.length;
+  $('.prog .bar i').style.width = (100*n/ALL.length)+'%';
+  $$('[data-done]').forEach(el=>el.classList.toggle('done', !!NG.store.get('done:'+el.dataset.done,false)));
+}
+NG.onStore = (k)=>{ if (k.indexOf('done:')===0) progress(); };
+const markDone = id=>{ if (!NG.store.get('done:'+id,false)) NG.store.set('done:'+id,true); };
+progress();
+
+/* ---------- ленивые виджеты ---------- */
+const W = {};
+function mount(el){ if (el.dataset.mounted) return; el.dataset.mounted='1'; const f=W[el.dataset.w]; if (f) try { f(el); } catch(err){ console.error(err); el.innerHTML='<div class="idea err">Ошибка виджета: '+err.message+'</div>'; } }
+
+/* ---------- панель задачи: разбор / оформление / ответ ---------- */
+function taskPanel(host, prob, kind, opts){
+  opts = opts||{};
+  const p = clone(prob);
+  let sol, cards;
+  if (kind==='nv'){ sol = NG.solveNV(p); cards = NG.cardsNV(p, sol); }
+  else if (kind==='rev'){ sol = NG.solveReverse(p); cards = NG.cardsRev(p, sol); }
+  else { sol = NG.solveTri(p); cards = NG.cardsTri(); }
+  const doneId = opts.doneId;
+  const tabs = h('div','tabs');
+  const panes = h('div');
+  const names = [['steps','▶ Разбор по шагам'],['cons','🧩 Оформление'],['ans','✍️ Мой ответ']];
+  const made = {};
+  names.forEach(([k,l],i)=>{ const b=h('button',i?'':'on',l); b.type='button'; b.onclick=()=>show(k); b.dataset.k=k; tabs.appendChild(b); });
+  host.appendChild(tabs); host.appendChild(panes);
+  const pane = {};
+  names.forEach(([k])=>{ pane[k]=h('div'); pane[k].style.display='none'; panes.appendChild(pane[k]); });
+  function show(k){
+    $$('button',tabs).forEach(b=>b.classList.toggle('on', b.dataset.k===k));
+    Object.keys(pane).forEach(x=>pane[x].style.display = x===k?'':'none');
+    if (made[k]) { if (k==='steps') made.steps.fig.refresh(); return; }
+    made[k] = true;
+    if (k==='steps'){
+      made.steps = NG.Player(pane.steps, sol.steps, {onStep:(i,n)=>{ if (i===n-1 && doneId) markDone(doneId); }});
+    } else if (k==='cons'){
+      NG.Constructor(pane.cons, cards, {key:(opts.key||doneId||'x'), onSolved:()=>{ if (doneId) markDone(doneId); }, orderHint: kind==='rev' ? 'Порядок: треугольник → Δ (или длина проекции) → перенос на линию связи → ответ.' : kind==='tri' ? 'Порядок: НВ сторон → сравнение → углы.' : null});
+    } else answerPane(pane.ans, kind, p, sol, opts, doneId);
+  }
+  show('steps');
+  return {sol, show};
+}
+
+function answerPane(host, kind, p, sol, opts, doneId){
+  const box = h('div','card');
+  host.appendChild(box);
+  if (kind==='nv'){
+    const fields = [];
+    if (!opts.hw) fields.push(['nv','|AB|, мм', sol.M.NV, Math.max(2, sol.M.NV*0.04)]);
+    sol.find.forEach(k=>fields.push(['a'+k, ANG[k]+', °', sol.ang[k], 3]));
+    box.innerHTML = `<p style="margin-top:0">Реши на листе, измерь и впиши. ${opts.hw?'<span class="muted">НВ не спрашиваем: она зависит от масштаба твоего листа. Углы — нет.</span>':'Допуск: НВ ±4%, углы ±3°.'}</p><div class="answer">${fields.map(f=>`<label>${f[1]}<input inputmode="decimal" data-f="${f[0]}" autocomplete="off"></label>`).join('')}<button class="btn pri sm" type="button">Проверить</button></div><div class="res"></div>`;
+    $('button',box).onclick = ()=>{
+      let ok=0; const lines=[];
+      fields.forEach(([id,label,val,tol])=>{
+        const inp = $(`input[data-f="${id}"]`,box); const v = parseFloat((inp.value||'').replace(',','.'));
+        const good = isFinite(v) && Math.abs(v-val) <= tol;
+        inp.classList.toggle('ok',good); inp.classList.toggle('bad',!good);
+        if (good) ok++;
+        lines.push(`${label.split(',')[0]}: ${isFinite(v)?fmt(v):'—'} ${good?'✅':'❌'} <span class="muted">(верно ≈ ${fmt(val, id==='nv'?1:0)})</span>`);
+      });
+      const all = ok===fields.length;
+      $('.res',box).innerHTML = lines.join('<br>') + (all?'<p class="c-good"><b>Отлично! Всё сходится.</b></p>':'<p class="muted">Если не сошлось — открой «Разбор по шагам» и сравни свой чертёж с каждым шагом.</p>');
+      if (all && doneId) markDone(doneId);
+    };
+  } else if (kind==='rev'){
+    box.innerHTML = `<p style="margin-top:0">Сколько решений получилось у тебя?</p><div class="answer"><label>Число решений<select data-f="n" style="padding:9px;border-radius:10px;background:var(--panel2);color:var(--text);border:1px solid var(--line2)"><option value="">—</option><option>0</option><option>1</option><option>2</option></select></label><button class="btn pri sm" type="button">Проверить</button></div><div class="res"></div>`;
+    $('button',box).onclick = ()=>{
+      const v = $('select',box).value; const good = v!=='' && +v===sol.count;
+      let extra = sol.Lk!=null ? `Длина недостающей проекции ≈ ${fmt(sol.Lk)} мм, расстояние до линии связи ≈ ${fmt(sol.h)} мм.` : `Δ ≈ ${fmt(sol.d)} мм.`;
+      $('.res',box).innerHTML = (good?'✅ <b>Верно!</b> ':'❌ Правильно: <b>'+sol.count+'</b>. ') + `<span class="muted">${extra}</span>`;
+      if (good && doneId) markDone(doneId);
+    };
+  } else {
+    box.innerHTML = `<p style="margin-top:0">Какая сторона наименьшая и её углы?</p><div class="answer"><label>Сторона<select data-f="s" style="padding:9px;border-radius:10px;background:var(--panel2);color:var(--text);border:1px solid var(--line2)"><option value="">—</option><option>AB</option><option>BC</option><option>AC</option></select></label><label>НВ, мм<input data-f="nv" inputmode="decimal"></label><label>α, °<input data-f="a" inputmode="decimal"></label><label>β, °<input data-f="b" inputmode="decimal"></label><button class="btn pri sm" type="button">Проверить</button></div><div class="res"></div>`;
+    $('button',box).onclick = ()=>{
+      const M = sol.M; const s=$('select',box).value;
+      const chk=(id,val,tol)=>{ const i=$(`input[data-f="${id}"]`,box), v=parseFloat((i.value||'').replace(',','.')); const g=isFinite(v)&&Math.abs(v-val)<=tol; i.classList.toggle('ok',g); i.classList.toggle('bad',!g); return g; };
+      const r=[s===sol.min, chk('nv',M.NV,Math.max(2,M.NV*.04)), chk('a',M.a,3), chk('b',M.b,3)];
+      $('.res',box).innerHTML = `Сторона: ${r[0]?'✅':'❌'} (${sol.min}) · НВ ${r[1]?'✅':'❌'} (≈ ${fmt(M.NV)}) · α ${r[2]?'✅':'❌'} (≈ ${fmt(M.a,0)}°) · β ${r[3]?'✅':'❌'} (≈ ${fmt(M.b,0)}°)`;
+      if (r.every(Boolean) && doneId) markDone(doneId);
+    };
+  }
+}
+
+/* ---------- список задач с раскрывающейся панелью ---------- */
+function taskList(host, list, kindOf, opts){
+  opts = opts||{};
+  const grid = h('div','tasks'); host.appendChild(grid);
+  const panel = h('div','tpanel'); panel.style.display='none'; host.appendChild(panel);
+  let openId = null;
+  list.forEach(t=>{
+    const kind = kindOf(t);
+    const id = (opts.prefix||'')+t.id;
+    const card = h('button','tcard'+(t.mine?' mine':'')); card.type='button'; card.dataset.done = id;
+    card.innerHTML = `<div class="tno"><span>${opts.label?opts.label(t):t.id}</span>${t.mine?'<em>мой вариант</em>':''}</div><div class="thumb"></div><div class="tq">${t.short || t.title || shortQ(t)}</div>`;
+    grid.appendChild(card);
+    requestAnimationFrame(()=>{
+      const pr = clone(t); if (kind==='nv' && pr.axes && (pr.find||[]).includes(3)) pr.show3 = true;
+      const els = kind==='tri' ? NG.solveTri(pr).steps[0].els : NG.U.baseScene(pr).els;
+      NG.Fig($('.thumb',card), {els, grid:false, pad:9, maxH:150, k:0.8});
+    });
+    card.onclick = ()=>{
+      if (openId===id){ panel.style.display='none'; openId=null; card.classList.remove('on'); return; }
+      $$('.tcard',grid).forEach(c=>c.classList.remove('on')); card.classList.add('on');
+      openId = id; panel.innerHTML=''; panel.style.display='';
+      const head = h('div','tpanel-h');
+      head.innerHTML = `<div><h3>${opts.label?opts.label(t):t.id}${t.title&&!opts.label?'':''} ${t.title&&opts.label?'':''}</h3><p style="margin:6px 0 0">${t.q||t.title||''}</p>${t.ctext?`<p class="mono" style="margin:6px 0 0">${t.ctext}</p>`:''}</div><button class="btn sm" type="button">✕ закрыть</button>`;
+      $('button',head).onclick = ()=>card.click();
+      panel.appendChild(head);
+      if (t.note){ const n=h('div','',t.note); panel.appendChild(n); }
+      taskPanel(panel, t, kind, {doneId:id, key:id, hw:opts.hw});
+      setTimeout(()=>panel.scrollIntoView({behavior:'smooth',block:'start'}),60);
+    };
+  });
+  progress();
+}
+function shortQ(t){
+  if (t.rev) return `Найти ${NG.nk(t.unknown[0],+t.unknown[1])}, ${t.aplane==='nv'?'дана НВ':ANG[t.aplane]+' = '+t.val+'°'}`;
+  return 'НВ и углы ' + t.find.map(k=>ANG[k]).join(', ');
+}
+
+/* ================= виджеты ================= */
+W.map = function(el){
+  const grid = h('div','map'); el.appendChild(grid);
+  const panel = h('div','card mpanel','<p class="muted" style="margin:0">Выбери блок на карте ↑</p>'); el.appendChild(panel);
+  NG.MAP.forEach((m,i)=>{
+    const b = h('button','mnode'+(m.goal?' goal':''), `<span class="mn">${m.n}${m.exam?' · НА ЗАЧЁТЕ':''}</span><b>${m.t}</b><small>${m.s}</small>`);
+    b.type='button';
+    b.onclick = ()=>{ $$('.mnode',grid).forEach(x=>x.classList.remove('on')); b.classList.add('on');
+      const prev = NG.MAP[i-1], next = NG.MAP[i+1];
+      panel.innerHTML = `<h4>${m.t}</h4><p>${m.d}</p><p class="muted" style="font-size:14px">${prev?'⬅ опирается на: <b>'+prev.t+'</b>':''}${prev&&next?' · ':''}${next?'➡ ведёт к: <b>'+next.t+'</b>':''}</p><a class="btn sm pri" href="#${m.to}">Перейти к разделу →</a>`; };
+    grid.appendChild(b);
+  });
+};
+W.point = el=>NG.widgetPoint(el);
+W.lab = el=>NG.widgetLineLab(el);
+W.tri3d = el=>NG.widgetTri3D(el);
+
+W['ex-p3'] = function(el){
+  const A={x:50,y:25,z:35};
+  const a1=[-A.x,A.y], a2=[-A.x,-A.z], a3=[A.y,-A.z], k=[A.y,A.y];
+  const axes = NG.U.axesEls([{x:62,y:34,z:42}],true);
+  const steps = [
+    {title:'Дано: A₁ и A₂', els:axes.concat([{t:'seg',a:a1,b:a2,c:'link',w:'link'},{t:'pt',p:a2,n:'A₂',c:'p2',lp:[-1,-1]},{t:'pt',p:a1,n:'A₁',c:'p1',lp:[-1,1]}]),
+      html:'<p>Известны две проекции точки A. Они на одной линии связи, ⊥ оси x. Нужно построить профильную проекцию <b class="c-p3">A₃</b>.</p>'},
+    {title:'Высота та же', els:[{t:'seg',a:a2,b:[A.y+12,-A.z],c:'aux',w:'aux'}],
+      html:'<p>A₃ и A₂ показывают одну и ту же высоту z. Поэтому A₃ лежит на <b>горизонтальной линии связи</b>, проведённой через A₂ (⊥ оси z).</p>'},
+    {title:'Глубину берём с П₁', els:[{t:'seg',a:a1,b:k,c:'aux',w:'aux'},{t:'dim',a:[-A.x-4,0],b:[-A.x-4,A.y],c:'dd',n:'y',side:-1}],
+      html:'<p>Глубина y видна на горизонтальной проекции — это расстояние от A₁ до оси x. Ведём от A₁ горизонталь до <b>линии 45°</b>.</p>'},
+    {title:'Поворачиваем вверх → A₃', els:[{t:'seg',a:k,b:a3,c:'aux',w:'aux'},{t:'pt',p:a3,n:'A₃',c:'p3',lp:[1,-1]}],
+      html:'<p>От линии 45° поднимаемся вертикально до горизонтали из A₂. Пересечение — <b class="c-p3">A₃</b>.</p>'},
+    {title:'Проверка', els:[{t:'dim',a:[0,-A.z-5],b:[A.y,-A.z-5],c:'dd',n:'y',side:1}],
+      html:'<p>Расстояние от A₃ до оси z равно y — тому же, что и от A₁ до оси x. Всё сходится: <b class="c-p3">A₃(y; z)</b>.</p>'}
+  ];
+  NG.Player(el, steps);
+};
+W['ex-tri'] = function(el){
+  const t = NG.PRAC_NV.find(x=>x.id==='n2');
+  el.appendChild(h('p','mono',`A(${t.A.x}; ${t.A.y}; ${t.A.z}), B(${t.B.x}; ${t.B.y}; ${t.B.z}) — найти |AB|, α, β, γ`));
+  taskPanel(el, t, 'nv', {doneId:'n2', key:'ex-n2'});
+};
+W['rev-ex1'] = function(el){ const t=NG.PRAC_REV.find(x=>x.id==='r1'); el.appendChild(h('p','mono',t.ctext)); taskPanel(el, t, 'rev', {doneId:'r1', key:'ex-r1'}); };
+W['rev-ex2'] = function(el){ const t=NG.PRAC_REV.find(x=>x.id==='r4'); el.appendChild(h('p','mono',t.ctext)); taskPanel(el, t, 'rev', {doneId:'r4', key:'ex-r4'}); };
+
+W.hw = function(el){
+  taskList(el, NG.HW, t=>t.rev?'rev':'nv', {prefix:'hw', hw:true, label:t=>t.id});
+};
+
+/* ---------- нарешка ---------- */
+W['prac-tabs'] = function(el){
+  const host = $('[data-w="prac"]');
+  const tabs = [['drill','🔎 Тип прямой'],['nv','📏 НВ и углы'],['rev','↕ Обратные'],['tri','△ Треугольник'],['gen','🎲 Генератор']];
+  const panes = {};
+  tabs.forEach(([k,l],i)=>{
+    const b = h('button',i?'':'on',l); b.type='button'; b.dataset.k=k; el.appendChild(b);
+    panes[k] = h('div'); panes[k].style.display = i?'none':''; host.appendChild(panes[k]);
+    b.onclick = ()=>{ $$('button',el).forEach(x=>x.classList.toggle('on',x===b)); Object.keys(panes).forEach(x=>panes[x].style.display = x===k?'':'none'); build(k); };
+  });
+  const built = {};
+  function build(k){
+    if (built[k]) return; built[k]=true;
+    const p = panes[k];
+    if (k==='drill') drill(p);
+    if (k==='nv'){ p.appendChild(h('p','muted','Уровни: ● — разминка, ●● — как на зачёте, ●●● — с подвохом. Координаты в мм: перерисуй условие на лист в клетку.')); taskList(p, NG.PRAC_NV, ()=> 'nv', {label:t=>'●'.repeat(t.lvl)+' '+t.title}); }
+    if (k==='rev'){ taskList(p, NG.PRAC_REV, ()=>'rev', {label:t=>t.title}); }
+    if (k==='tri'){ taskList(p, NG.PRAC_TRI, ()=>'tri', {label:t=>t.title}); }
+    if (k==='gen') generator(p);
+  }
+  build('drill');
+};
+W.prac = function(){};
+
+function drill(host){
+  const box = h('div'); host.appendChild(box);
+  let score = NG.store.get('drill', {ok:0, all:0});
+  function next(){
+    box.innerHTML='';
+    const type = NG.TYPE_ORDER[Math.floor(Math.random()*NG.TYPE_ORDER.length)];
+    const seg = NG.randSeg(type);
+    const top = h('div','cons-top'); top.innerHTML = `<h4>Что это за прямая?</h4><span class="score">Верно: <b>${score.ok}</b> из ${score.all}</span>`;
+    box.appendChild(top);
+    const figHost = h('div'); box.appendChild(figHost);
+    const draw = (p3)=>{ figHost.innerHTML=''; const base=NG.U.baseScene({A:seg.A,B:seg.B,axes:true,show3:p3}); const els=base.els.slice(); if (p3){ const S=base.S; [[seg.A,S.a1,S.a2,S.a3],[seg.B,S.b1,S.b2,S.b3]].forEach(([P,p1,p2,q])=>els.push({t:'seg',a:p2,b:q,c:'link',w:'link'},{t:'seg',a:p1,b:[P.y,P.y],c:'link',w:'link'},{t:'seg',a:[P.y,P.y],b:q,c:'link',w:'link'})); if (G.dist(S.a3,S.b3)>0.5) els.push({t:'seg',a:S.a3,b:S.b3,c:'p3'}); els.push(...NG.U.mergePts([{p:S.a3,n:'A₃',c:'p3',others:[S.b3,S.a2]},{p:S.b3,n:'B₃',c:'p3',others:[S.a3,S.b2]}])); } NG.Fig(figHost,{els,maxH:380}); };
+    draw(false);
+    const tg = h('button','btn sm','Показать профильную проекцию'); tg.type='button'; let p3=false; tg.onclick=()=>{ p3=!p3; tg.textContent = p3?'Скрыть профильную проекцию':'Показать профильную проекцию'; draw(p3); };
+    box.appendChild(h('div','vbtns')).appendChild(tg);
+    const opts = h('div','opts'); box.appendChild(opts);
+    const fb = h('div'); box.appendChild(fb);
+    NG.TYPE_ORDER.forEach(k=>{
+      const b = h('button','opt', NG.TYPES[k].icon+' '+NG.TYPES[k].name); b.type='button';
+      b.onclick = ()=>{
+        if (opts.dataset.done) return; opts.dataset.done='1';
+        const good = k===type;
+        b.classList.add(good?'ok':'bad');
+        $$('.opt',opts).forEach((x,i)=>{ if (NG.TYPE_ORDER[i]===type) x.classList.add('ok'); });
+        const T = NG.TYPES[type];
+        fb.innerHTML = `<div class="idea ${good?'good':'err'}">${good?'<b>Верно!</b>':'<b>Не то.</b> Это — '+T.name+'.'} ${T.sign}</div>`;
+        propsQuiz(fb, type, good);
+      };
+      opts.appendChild(b);
+    });
+  }
+  function propsQuiz(fb, type, typeOk){
+    const T = NG.TYPES[type];
+    const r = NG.rng(Math.random()*1e9|0);
+    const tru = NG.shuffle(T.props, r()*1e9|0).slice(0,4), fal = NG.shuffle(T.fprops, r()*1e9|0).slice(0,3);
+    const items = NG.shuffle(tru.map(s=>({s,ok:true})).concat(fal.map(s=>({s,ok:false}))), r()*1e9|0);
+    const card = h('div','card'); card.innerHTML = '<h4>Теперь опиши свойства: отметь все верные</h4>';
+    const chips = h('div','chips'); card.appendChild(chips);
+    items.forEach(it=>{ const c=h('button','chip',it.s); c.type='button'; c.onclick=()=>{ if (!card.dataset.done) c.classList.toggle('sel'); }; it.el=c; chips.appendChild(c); });
+    const row = h('div','cons-foot'); const chk=h('button','btn pri sm','Проверить свойства'); chk.type='button'; const nx=h('button','btn sm','Следующая прямая →'); nx.type='button'; row.appendChild(chk); row.appendChild(nx); card.appendChild(row);
+    const res = h('div','res'); card.appendChild(res);
+    chk.onclick = ()=>{
+      if (card.dataset.done) return; card.dataset.done='1';
+      let all=true;
+      items.forEach(it=>{ const sel=it.el.classList.contains('sel'); it.el.classList.remove('sel'); if (sel&&it.ok) it.el.classList.add('ok'); else if (sel&&!it.ok){ it.el.classList.add('bad'); all=false; } else if (!sel&&it.ok){ it.el.classList.add('miss'); all=false; } });
+      score.all++; if (all && typeOk) score.ok++; NG.store.set('drill', score);
+      res.innerHTML = (all?'<b class="c-good">Свойства верно!</b> ':'<b class="c-warn">Почти.</b> Зелёные — верно отмечены, красные — лишние, пунктир — пропущены. ') + `<div class="muted" style="margin-top:6px">Полный ответ: <b>${T.name}</b>. ${T.props.join('; ')}.</div>`;
+    };
+    nx.onclick = next;
+    fb.appendChild(card);
+  }
+  next();
+}
+
+function randomNV(){
+  const r = Math.random();
+  const type = r<0.7 ? (Math.random()<.5?'ga':'gd') : r<0.8 ? 'p' : r<0.9 ? 'h' : 'f';
+  const seg = NG.randSeg(type);
+  const finds = type==='p' ? [[1,2]] : [[1,2],[1,2],[1],[2],[1,2,3],[3],[1,3],[2,3]];
+  const find = finds[Math.floor(Math.random()*finds.length)];
+  return {id:'g'+Date.now(), A:seg.A, B:seg.B, find, axes:true, coords:true};
+}
+function generator(host){
+  host.appendChild(h('p','muted','Каждый раз новый отрезок с целыми координатами. Реши, впиши ответ — потом смотри разбор.'));
+  const bt = h('button','btn pri','🎲 Новая задача'); bt.type='button'; host.appendChild(bt);
+  const box = h('div','tpanel'); host.appendChild(box);
+  function gen(){ box.innerHTML=''; const t=randomNV(); box.appendChild(h('p','mono',`A(${t.A.x}; ${t.A.y}; ${t.A.z}), B(${t.B.x}; ${t.B.y}; ${t.B.z}) — найти |AB|, ${t.find.map(k=>ANG[k]).join(', ')}`)); taskPanel(box, t, 'nv', {key:t.id}); }
+  bt.onclick = gen; gen();
+}
+
+/* ---------- пробный зачёт ---------- */
+W.exam = function(el){
+  el.innerHTML = `<div class="card"><p style="margin-top:0">Две задачи, как на КР. Решай на листе, отвечай здесь. Таймер — просто для ориентира (дай себе 30–40 минут).</p><button class="btn pri" type="button">Начать пробный зачёт</button></div><div class="ex-body"></div>`;
+  const body = $('.ex-body',el);
+  $('button',el).onclick = start;
+  let timer=null;
+  function start(){
+    clearInterval(timer);
+    body.innerHTML='';
+    const t0 = Date.now();
+    const tm = h('div','score'); body.appendChild(tm);
+    timer = setInterval(()=>{ const s=Math.floor((Date.now()-t0)/1000); tm.innerHTML = `⏱ <b>${Math.floor(s/60)}:${String(s%60).padStart(2,'0')}</b>`; },1000);
+    const t1type = NG.TYPE_ORDER[Math.floor(Math.random()*8)];
+    const s1 = NG.randSeg(t1type);
+    const t2 = randomNV(); const g2 = NG.randSeg(Math.random()<.5?'ga':'gd'); t2.A=g2.A; t2.B=g2.B; t2.find=[1,2];
+    const c1 = h('div','card'); c1.innerHTML = '<h4>Задача 1. Определи положение прямой и опиши её свойства</h4>'; body.appendChild(c1);
+    const f1 = h('div'); c1.appendChild(f1); NG.Fig(f1,{els:NG.U.baseScene({A:s1.A,B:s1.B,axes:true}).els, maxH:360});
+    const sel = h('select'); sel.style.cssText='padding:10px;border-radius:10px;background:var(--panel2);color:var(--text);border:1px solid var(--line2);margin:10px 0;max-width:100%';
+    sel.innerHTML = '<option value="">— выбери тип —</option>' + NG.TYPE_ORDER.map(k=>`<option value="${k}">${NG.TYPES[k].name}</option>`).join('');
+    c1.appendChild(sel);
+    const T = NG.TYPES[t1type];
+    const allProps = NG.shuffle(T.props.slice(0,4).map(s=>({s,ok:true})).concat(T.fprops.slice(0,3).map(s=>({s,ok:false}))), Date.now()%1000);
+    c1.appendChild(h('p','muted','Отметь верные свойства:'));
+    const chips = h('div','chips'); c1.appendChild(chips);
+    allProps.forEach(it=>{ const c=h('button','chip',it.s); c.type='button'; c.onclick=()=>c.classList.toggle('sel'); it.el=c; chips.appendChild(c); });
+    const c2 = h('div','card'); c2.innerHTML = `<h4>Задача 2. Найди НВ отрезка и углы α, β</h4><p class="mono">A(${t2.A.x}; ${t2.A.y}; ${t2.A.z}), B(${t2.B.x}; ${t2.B.y}; ${t2.B.z})</p>`; body.appendChild(c2);
+    const f2 = h('div'); c2.appendChild(f2); NG.Fig(f2,{els:NG.U.baseScene({A:t2.A,B:t2.B,axes:true}).els, maxH:360});
+    const M = NG.measure(t2.A,t2.B);
+    const ans = h('div','answer', `<label>|AB|, мм<input data-f="nv" inputmode="decimal"></label><label>α, °<input data-f="a" inputmode="decimal"></label><label>β, °<input data-f="b" inputmode="decimal"></label>`); c2.appendChild(ans);
+    const sub = h('button','btn pri','Сдать работу'); sub.type='button'; body.appendChild(sub);
+    const out = h('div'); body.appendChild(out);
+    sub.onclick = ()=>{
+      clearInterval(timer);
+      let pts = 0;
+      const typeOk = sel.value===t1type; if (typeOk) pts++;
+      let propsOk = true;
+      allProps.forEach(it=>{ const s=it.el.classList.contains('sel'); it.el.classList.remove('sel'); if (s&&it.ok) it.el.classList.add('ok'); else if (s&&!it.ok){ it.el.classList.add('bad'); propsOk=false; } else if (!s&&it.ok){ it.el.classList.add('miss'); propsOk=false; } });
+      if (propsOk) pts++;
+      const chk=(id,val,tol)=>{ const i=$(`input[data-f="${id}"]`,ans), v=parseFloat((i.value||'').replace(',','.')); const g=isFinite(v)&&Math.abs(v-val)<=tol; i.classList.toggle('ok',g); i.classList.toggle('bad',!g); return g; };
+      const r2 = [chk('nv',M.NV,Math.max(2,M.NV*.04)), chk('a',M.a,3), chk('b',M.b,3)];
+      pts += r2.filter(Boolean).length;
+      out.innerHTML = `<div class="idea ${pts>=4?'good':'warn'}"><b>Итог: ${pts} из 5.</b> Задача 1: тип ${typeOk?'✅':'❌ ('+T.name+')'}, свойства ${propsOk?'✅':'❌'}. Задача 2: НВ ${r2[0]?'✅':'❌'} (≈ ${fmt(M.NV)} мм), α ${r2[1]?'✅':'❌'} (≈ ${fmt(M.a,0)}°), β ${r2[2]?'✅':'❌'} (≈ ${fmt(M.b,0)}°).</div><h3>Разбор задачи 1</h3><div class="card"><p><b>${T.name}</b>. ${T.sign}</p><p><b>Свойства:</b> ${T.props.join('; ')}.</p></div><h3>Разбор задачи 2</h3>`;
+      const sHost = h('div'); out.appendChild(sHost);
+      NG.Player(sHost, NG.solveNV(clone(t2)).steps);
+      sub.disabled = true;
+    };
+  }
+};
+
+/* ---------- шпаргалка и карточки ---------- */
+W.cheat = function(el){
+  const rows = NG.TYPE_ORDER.filter(k=>k!=='gd').map(k=>{ const T=NG.TYPES[k]; return `<tr><td><b>${k==='ga'?'Общего положения':T.name}</b></td><td>${k==='ga'?'Ни одна проекция не ∥ и не ⊥ оси x':T.sign}</td><td>${T.nv}</td><td>${k==='ga'?'Восходящая / нисходящая; все проекции короче НВ; 0° < α, β, γ < 90°':T.props.slice(2).join('; ')}</td></tr>`; }).join('');
+  el.innerHTML = `<div class="card"><div class="tscroll"><table class="t"><tr><th>Прямая</th><th>Признак на КЧ</th><th>Где НВ</th><th>Свойства</th></tr>${rows}</table></div></div>
+  <div class="card"><h4>Метод прямоугольного треугольника</h4><div class="tscroll"><table class="t"><tr><th>Угол</th><th>I катет</th><th>II катет</th><th>Откуда II катет</th></tr>
+  <tr><td class="c-ang">α (П₁)</td><td class="c-p1">A₁B₁</td><td class="c-dd">Δz</td><td>фронтальная проекция, по вертикали</td></tr>
+  <tr><td class="c-ang">β (П₂)</td><td class="c-p2">A₂B₂</td><td class="c-dd">Δy</td><td>горизонтальная проекция, по вертикали</td></tr>
+  <tr><td class="c-ang">γ (П₃)</td><td class="c-p3">A₃B₃</td><td class="c-dd">Δx</td><td>между линиями связи, по горизонтали</td></tr></table></div>
+  <p>Гипотенуза = <b class="c-nv">НВ</b>. Угол наклона — <b>между проекцией и гипотенузой</b>. Δ — координата, которой нет у проекции.</p></div>`;
+};
+W.flash = function(el){
+  const g = h('div','flash'); el.appendChild(g);
+  NG.FLASH.forEach(([q,a],i)=>{
+    const c = h('button','fc',`<div class="fc-in"><div class="fc-f"><small>Вопрос ${i+1}</small><b>${q}</b><span class="muted" style="margin-top:auto;font-size:12px">нажми, чтобы перевернуть</span></div><div class="fc-b"><small>Ответ</small>${a}</div></div>`);
+    c.type='button'; c.onclick=()=>c.classList.toggle('flip'); g.appendChild(c);
+  });
+};
+
+/* ---------- монтирование ---------- */
+const holders = $$('[data-w]');
+if (window.IntersectionObserver){
+  const io = new IntersectionObserver(es=>es.forEach(e=>{ if (e.isIntersecting){ mount(e.target); io.unobserve(e.target); } }), {rootMargin:'400px 0px'});
+  holders.forEach(x=>io.observe(x));
+} else holders.forEach(mount);
+/* переход по якорю к ленивому разделу */
+window.addEventListener('hashchange',()=>{ const s=$(location.hash); if (s) $$('[data-w]',s).forEach(mount); });
+NG.mountAll = ()=>holders.forEach(mount);
+})();
+
+</script>
+</body>
+</html>
