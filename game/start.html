@@ -7485,7 +7485,17 @@ function buildAK74(THREE, opts) {
      pos — смещение относительно родителя в системе покоя. */
   function build(M) {
     const B = [];
-    const add = (name, parent, pos) => { B.push({ name, parent, pos }); return name; };
+    /* Если у метрик есть суставы внешней модели (M.joints — мировые позиции
+       в позе покоя), смещения костей берутся из них: скелет в точности
+       совпадает со скелетом, к которому привязан меш. Иерархия и оси те же. */
+    const J = M.joints;
+    const add = (name, parent, pos) => {
+      if (J && J[name] && (!parent || J[parent])) {
+        const a = J[name], p = parent ? J[parent] : [0, 0, 0];
+        pos = [a[0] - p[0], a[1] - p[1], a[2] - p[2]];
+      }
+      B.push({ name, parent, pos }); return name;
+    };
 
     add('root', null, [0, 0, 0]);
     add('hips', 'root', [0, M.hipY, 0]);
@@ -7549,7 +7559,23 @@ function buildAK74(THREE, opts) {
     return m;
   }
 
-  return { metrics, build, restWorld, indexOf, FINGERS, THUMB };
+  /* Метрики по суставам внешней модели: те же поля, что у metrics(). */
+  function metricsFromJoints(J, H) {
+    const M = metrics(H || 1.80, 1);
+    const d = (a, b) => Math.hypot(J[a][0] - J[b][0], J[a][1] - J[b][1], J[a][2] - J[b][2]);
+    Object.assign(M, {
+      joints: J,
+      hipY: J.hips[1], waistY: J.spine[1], chestY: J.chest[1], neckY: J.neck[1], headY: J.head[1],
+      shoulderY: J.shoulderR[1], shoulderX: J.shoulderR[0],
+      upperArm: d('shoulderR', 'elbowR'), foreArm: d('elbowR', 'wristR'),
+      hipX: J.hipR[0], thigh: d('hipR', 'kneeR'), shin: d('kneeR', 'ankleR'), ankleY: J.ankleR[1]
+    });
+    if (J.eyes) M.eyeY = J.eyes[1];
+    if (J.top) { M.topY = J.top[1]; M.H = J.top[1]; }
+    return M;
+  }
+
+  return { metrics, metricsFromJoints, build, restWorld, indexOf, FINGERS, THUMB };
 });
 /* ==========================================================================
    МОДУЛЬ: soldier.js
@@ -9143,7 +9169,7 @@ function buildAK74(THREE, opts) {
       camo: 'delta_green',
       head: 'helmet',
       mask: false,
-      gearCol: [70, 72, 50], hardCol: [40, 41, 38], maskCol: [52, 56, 40],
+      gearCol: [96, 90, 64], hardCol: [58, 56, 44], maskCol: [52, 56, 40],
       bootCol: [52, 45, 36], gloveCol: [86, 80, 58], patchCol: [[56, 60, 42], [178, 170, 132]],
       seed: 1201
     },
@@ -9181,6 +9207,26 @@ function buildAK74(THREE, opts) {
     PRESETS[k].skinTone = BODY.skinTone;
   }
   const ORDER = ['delta_1', 'delta_2', 'alpha_1', 'alpha_2'];
+
+  /* ------------------------------------------- внешняя модель бойца --- */
+  /* Реалистичный боец собирается в Blender из ассетов MakeHuman (тело,
+     кожа по фотографиям, глаза, брови) и одежды с картами складок —
+     скрипт game/tools/soldier/build.py. Результат лежит в assets/soldier:
+     soldier.json (суставы, описание мешей и текстур) + soldier.bin (буферы).
+     Меш привязан к тому же скелету, что и процедурный боец, поэтому риг,
+     IK рук и хват оружия работают без изменений. Если пакет не загрузился,
+     остаётся процедурная модель. */
+  const PACK_DIR = 'assets/soldier/';
+  const GA = typeof self !== 'undefined' ? self.GAssets : null;
+  if (GA) GA.add('soldier', (async () => {
+    const [hdr, bin] = await Promise.all([GA.fetchAny(PACK_DIR + 'soldier.json', 'json'), GA.fetchAny(PACK_DIR + 'soldier.bin')]);
+    const files = new Set();
+    for (const m of hdr.meshes) for (const k in (m.tex || {})) if (typeof m.tex[k] === 'string') files.add(m.tex[k]);
+    const img = {};
+    await Promise.all([...files].map(async (f) => { img[f] = await GA.image(PACK_DIR + 'tex/' + f); }));
+    return { hdr, bin, img };
+  })());
+  const packData = () => (GA && GA.data.soldier) || null;
 
   /* --------------------------------------------------------- материалы -- */
   /* Кэш текстур: четыре бойца используют разные камуфляжи, но общие карты
@@ -9552,7 +9598,8 @@ function buildAK74(THREE, opts) {
     const P = PRESETS[key];
     if (!P) throw new Error('нет пресета бойца: ' + key);
 
-    const M = SK.metrics(P.height, P.build);
+    const pack = packData();
+    const M = pack ? SK.metricsFromJoints(pack.hdr.joints, P.height) : SK.metrics(P.height, P.build);
     const bones = SK.build(M);
     const BI = SK.indexOf(bones);
     const rest = SK.restWorld(bones);
@@ -9560,7 +9607,7 @@ function buildAK74(THREE, opts) {
        на 0,42 м ткани, поэтому самое крупное пятно выходит ~11 см — как
        на реальной форме. */
     P.camoTile = 0.42;
-    const geos = soldierGeometry(THREE, P, M, BI, rest);
+    const geos = pack ? packGeometry(THREE, pack, P, BI) : soldierGeometry(THREE, P, M, BI, rest);
 
     /* --- three-скелет --- */
     const tb = bones.map((b) => {
@@ -9578,20 +9625,21 @@ function buildAK74(THREE, opts) {
     tb[0].updateMatrixWorld(true);
     const skeleton = new THREE.Skeleton(tb);
 
-    const mats = buildMaterials(THREE, P);
+    const mats = pack ? packMaterials(THREE, P, pack) : buildMaterials(THREE, P);
     const root = new THREE.Group();
     root.name = 'soldier_' + key;
     root.add(tb[0]);
 
     const meshes = {};
-    for (const g of S.GROUPS) {
+    for (const g of (pack ? Object.keys(geos) : S.GROUPS)) {
       const geo = geos[g];
       if (!geo) continue;
       const mesh = new THREE.SkinnedMesh(geo, mats[g]);
       mesh.name = key + '_' + g;
-      mesh.castShadow = true;
+      mesh.castShadow = !(mats[g] && mats[g].transparent);
       mesh.receiveShadow = true;
       mesh.frustumCulled = false;
+      if (mats[g] && mats[g].transparent) mesh.renderOrder = 2;
       mesh.bind(skeleton);
       root.add(mesh);
       meshes[g] = mesh;
@@ -9631,6 +9679,196 @@ function buildAK74(THREE, opts) {
       out[g] = geo;
     }
     geoCache.set(key, out);
+    return out;
+  }
+
+  /* ----------------------------------------- геометрия из пакета ------ */
+  /* Буферы общие для всех бойцов; какие меши надеть, решает пресет:
+     поле when меша — условия на поля пресета (head, mask). */
+  const packGeoCache = new Map();
+  function packGeometry(THREE, pack, P, BI) {
+    const hdr = pack.hdr, bin = pack.bin;
+    const remap = hdr.bones.map((n) => (BI[n] === undefined ? BI.hips : BI[n]));
+    const out = {};
+    for (const m of hdr.meshes) {
+      if (m.when && Object.keys(m.when).some((k) => P[k] !== m.when[k])) continue;
+      let geo = packGeoCache.get(m.name);
+      if (!geo) {
+        const n = m.count;
+        geo = new THREE.BufferGeometry();
+        geo.setAttribute('position', new THREE.BufferAttribute(new Float32Array(bin, m.pos[0], m.pos[1]), 3));
+        geo.setAttribute('normal', new THREE.BufferAttribute(new Int16Array(bin, m.nrm[0], m.nrm[1]), 3, true));
+        geo.setAttribute('uv', new THREE.BufferAttribute(new Float32Array(bin, m.uv[0], m.uv[1]), 2));
+        const si = new Uint8Array(bin, m.si[0], m.si[1]), si16 = new Uint16Array(n * 4);
+        for (let i = 0; i < si.length; i++) si16[i] = remap[si[i]];
+        geo.setAttribute('skinIndex', new THREE.Uint16BufferAttribute(si16, 4));
+        geo.setAttribute('skinWeight', new THREE.BufferAttribute(new Uint8Array(bin, m.sw[0], m.sw[1]), 4, true));
+        geo.setIndex(new THREE.BufferAttribute(m.index32 ? new Uint32Array(bin, m.index[0], m.index[1])
+          : new Uint16Array(bin, m.index[0], m.index[1]), 1));
+        geo.boundingSphere = new THREE.Sphere(new THREE.Vector3(0, 1, 0), 1.2);
+        packGeoCache.set(m.name, geo);
+      }
+      out[m.group || m.name] = geo;
+    }
+    return out;
+  }
+
+  /* ----------------------------------------- материалы пакета --------- */
+  const packTexCache = new Map();
+  function packTex(THREE, pack, file, color) {
+    const k = file + (color ? '|c' : '');
+    if (packTexCache.has(k)) return packTexCache.get(k);
+    const img = pack.img[file];
+    const t = new THREE.Texture(img);
+    t.flipY = false;                       // ImageBitmap уже перевёрнут при декодировании
+    t.wrapS = t.wrapT = THREE.RepeatWrapping;
+    t.anisotropy = 8;
+    t.generateMipmaps = true;
+    t.minFilter = THREE.LinearMipmapLinearFilter;
+    if (color && 'colorSpace' in t) t.colorSpace = THREE.SRGBColorSpace;
+    t.needsUpdate = true;
+    /* средний цвет (линейный) — для перекраски и нормировки деталей */
+    const c = document.createElement('canvas'); c.width = c.height = 16;
+    const g = c.getContext('2d'); g.drawImage(img, 0, 0, 16, 16);
+    const d = g.getImageData(0, 0, 16, 16).data;
+    const lin = (v) => Math.pow(v / 255, 2.2);
+    const avg = [0, 0, 0]; let wsum = 0;
+    for (let i = 0; i < d.length; i += 4) {
+      const a = d[i + 3] / 255; wsum += a;
+      for (let j = 0; j < 3; j++) avg[j] += lin(d[i + j]) * a;
+    }
+    t.userData.mean = avg.map((v) => v / Math.max(wsum, 1e-3));
+    packTexCache.set(k, t);
+    return t;
+  }
+
+  /* Ткань формы: камуфляж проецируется трипланарно по позе покоя (пятна
+     одного масштаба на всём теле, без швов), а фактура самой вещи —
+     швы, карманы, складки, запечённые в её текстуре, — умножается сверху
+     как яркость. Так один и тот же крой становится любой из четырёх форм. */
+  function garmentMat(THREE, camoTex, opt) {
+    const mat = new THREE.MeshStandardMaterial({
+      map: opt.detail || null, normalMap: opt.normal || null,
+      normalScale: new THREE.Vector2(opt.nScale || 1, opt.nScale || 1),
+      roughness: opt.rough === undefined ? 0.93 : opt.rough, metalness: 0,
+      side: opt.side || THREE.FrontSide
+    });
+    const mean = opt.mean || (opt.detail ? opt.detail.userData.mean : [1, 1, 1]);
+    const lm = 0.2126 * mean[0] + 0.7152 * mean[1] + 0.0722 * mean[2];
+    mat.onBeforeCompile = (sh) => {
+      sh.uniforms.uCamo = { value: camoTex };
+      sh.uniforms.uTile = { value: 1 / (opt.tile || 0.42) };
+      sh.uniforms.uDetail = { value: opt.detailK === undefined ? 1 : opt.detailK };
+      sh.uniforms.uDetailMean = { value: Math.max(lm, 1e-3) };
+      sh.vertexShader = sh.vertexShader
+        .replace('#include <common>', `#include <common>
+          varying vec3 vRestPos;
+          varying vec3 vRestNrm;`)
+        .replace('#include <begin_vertex>', `#include <begin_vertex>
+          vRestPos = position;
+          vRestNrm = normal;`);
+      sh.fragmentShader = sh.fragmentShader
+        .replace('#include <common>', `#include <common>
+          uniform sampler2D uCamo;
+          uniform float uTile, uDetail, uDetailMean;
+          varying vec3 vRestPos;
+          varying vec3 vRestNrm;`)
+        .replace('#include <map_fragment>', `
+          vec3 tpN = abs(normalize(vRestNrm));
+          tpN = pow(tpN, vec3(4.0));
+          tpN /= max(tpN.x + tpN.y + tpN.z, 1e-4);
+          vec3 tpP = vRestPos * uTile;
+          vec4 camo = texture2D(uCamo, tpP.zy) * tpN.x + texture2D(uCamo, tpP.xz) * tpN.y + texture2D(uCamo, tpP.xy) * tpN.z;
+          #ifdef USE_MAP
+            vec3 det = texture2D(map, vMapUv).rgb;
+            float dl = dot(det, vec3(0.2126, 0.7152, 0.0722)) / uDetailMean;
+            camo.rgb *= mix(1.0, clamp(dl, 0.15, 1.8), uDetail);
+          #endif
+          diffuseColor *= camo;`);
+    };
+    mat.customProgramCacheKey = () => 'garment' + (opt.detail ? 1 : 0) + (opt.normal ? 1 : 0);
+    return mat;
+  }
+
+  /* Снаряжение с собственной текстурой: цвет переносится на целевой
+     поканально — оттенки, пряжки и потёртости исходника сохраняются. */
+  function tintedMat(THREE, pack, tex, target, extra) {
+    const map = packTex(THREE, pack, tex.map, true);
+    const m = tex.mean || map.userData.mean, lin = (v) => Math.pow(v / 255, 2.2);
+    const gain = target ? target.map((v, i) => lin(v) / Math.max(m[i], 1e-3)) : [1, 1, 1];
+    const c = new THREE.Color(gain[0], gain[1], gain[2]);
+    const mat = new THREE.MeshStandardMaterial(Object.assign({
+      map, color: c,
+      normalMap: tex.normalMap ? packTex(THREE, pack, tex.normalMap) : null,
+      roughnessMap: tex.roughnessMap ? packTex(THREE, pack, tex.roughnessMap) : null,
+      roughness: 1, metalness: 0
+    }, extra || {}));
+    return mat;
+  }
+
+  function packMaterials(THREE, P, pack) {
+    const texOf = {};
+    for (const m of pack.hdr.meshes) texOf[m.group || m.name] = m.tex || {};
+    const tx = (g, k, color) => (texOf[g] && texOf[g][k] ? packTex(THREE, pack, texOf[g][k], color) : null);
+    const camoCv = cached('camo_' + P.camo + '_' + P.seed, () => T.camoAlbedo(P.camo, P.seed, 512));
+    const camo = mkTex(THREE, camoCv, 1, true);
+    const out = {};
+
+    const skin = new THREE.MeshStandardMaterial({
+      map: tx('skin', 'map', true), normalMap: tx('skin', 'normalMap'),
+      normalScale: new THREE.Vector2(0.55, 0.55),
+      roughnessMap: tx('skin', 'roughnessMap'), roughness: 1, metalness: 0
+    });
+    /* подповерхностное рассеивание: тёплый ореол по краю и мягкий
+       терминатор — кожа не должна выглядеть пластиком */
+    skin.onBeforeCompile = (sh) => {
+      sh.fragmentShader = sh.fragmentShader.replace('#include <lights_fragment_end>', `#include <lights_fragment_end>
+        float sssRim = pow(clamp(1.0 - dot(normal, normalize(vViewPosition)), 0.0, 1.0), 2.4);
+        reflectedLight.indirectDiffuse += sssRim * vec3(0.16, 0.05, 0.03) * diffuseColor.rgb;
+        reflectedLight.directDiffuse *= vec3(1.0, 0.96, 0.94);`);
+    };
+    out.skin = skin;
+    out.eye = new THREE.MeshPhysicalMaterial({
+      map: tx('eye', 'map', true), roughness: 0.35, metalness: 0,
+      clearcoat: 1, clearcoatRoughness: 0.04
+    });
+    /* роговица: прозрачная линза с влажным бликом поверх радужки */
+    out.cornea = new THREE.MeshPhysicalMaterial({
+      color: 0xffffff, transparent: true, opacity: 0.12, roughness: 0.02, metalness: 0,
+      clearcoat: 1, clearcoatRoughness: 0.02, depthWrite: false, specularIntensity: 1
+    });
+    for (const g of ['brow', 'lash']) {
+      out[g] = new THREE.MeshStandardMaterial({
+        map: tx(g, 'map', true), color: new THREE.Color(g === 'brow' ? 0.55 : 0.4, g === 'brow' ? 0.45 : 0.33, g === 'brow' ? 0.38 : 0.3),
+        transparent: true, depthWrite: false, alphaTest: 0.02, roughness: 0.8, metalness: 0, side: THREE.DoubleSide
+      });
+    }
+    out.shirt = garmentMat(THREE, camo, { mean: texOf.shirt.mean, detail: tx('shirt', 'map', true), detailK: 0.85, tile: P.camoTile });
+    out.pants = garmentMat(THREE, camo, { mean: texOf.pants.mean, detail: tx('pants', 'map', true), normal: tx('pants', 'normalMap'), detailK: 0.9, tile: P.camoTile });
+    out.vest = tintedMat(THREE, pack, texOf.vest, P.gearCol);
+    out.boot = tintedMat(THREE, pack, texOf.boot, P.bootCol);
+    out.glove = tintedMat(THREE, pack, texOf.glove, P.gloveCol, { roughness: 0.8 });
+
+    /* Головные уборы и балаклава: развёртка у них в метрах, поэтому
+       тканевые карты нормалей ложатся с реальным шагом нити. */
+    const DS = THREE.DoubleSide;
+    const fabN = cached('fabN', () => T.fabricNormal(77, 256, 52, 1));
+    const nylN = cached('nylN', () => T.fabricNormal(31, 256, 96, 0.45));
+    const nrmTex = (cv, rep) => { const t = mkTex(THREE, cv, 1); t.repeat.set(rep, rep); return t; };
+    out.helmet = garmentMat(THREE, camo, { tile: P.camoTile * 0.8, side: DS, normal: nrmTex(fabN, 1 / 0.05), nScale: 0.6, rough: 0.9 });
+    out.hat = garmentMat(THREE, camo, { tile: P.camoTile, side: DS, normal: nrmTex(fabN, 1 / 0.045), nScale: 0.8, rough: 0.95 });
+    out.headHard = new THREE.MeshStandardMaterial({ color: srgb(THREE, P.hardCol), roughness: 0.55, metalness: 0.05, side: DS });
+    out.headGear = new THREE.MeshStandardMaterial({ color: srgb(THREE, P.gearCol), roughness: 1, metalness: 0, side: DS,
+      normalMap: nrmTex(nylN, 1 / 0.03), normalScale: new THREE.Vector2(0.8, 0.8) });
+    out.headRubber = new THREE.MeshStandardMaterial({ color: srgb(THREE, [26, 26, 25]), roughness: 0.85, metalness: 0, side: DS });
+    const maskCv = cached('mask_' + P.maskCol.join('_'), () => T.nylonAlbedo(P.maskCol, P.seed + 21, 256));
+    const maskMap = mkTex(THREE, maskCv, 1, true); maskMap.repeat.set(14, 14);
+    const patchCv = cached('patch_' + P.faction + '_' + P.patchCol.join('_'), () => patchCanvas(P.faction, P.patchCol[0], P.patchCol[1]));
+    const patchTex = mkTex(THREE, patchCv, 0, true);
+    patchTex.wrapS = patchTex.wrapT = THREE.ClampToEdgeWrapping;
+    out.patch = new THREE.MeshStandardMaterial({ map: patchTex, roughness: 0.92, metalness: 0, side: DS });
+    out.mask = new THREE.MeshStandardMaterial({ map: maskMap, normalMap: nrmTex(fabN, 30), normalScale: new THREE.Vector2(0.9, 0.9),
+      roughness: 0.97, metalness: 0, side: DS });
     return out;
   }
 
@@ -13431,7 +13669,7 @@ function buildAK74(THREE, opts) {
     /* Голова активного бойца прячется от собственной камеры: иначе в
        кадре торчит изнанка шлема или поля панамы. Остальное тело видно —
        как в бодикаме. */
-    const HEAD_GROUPS = ['skin', 'helmet', 'hat', 'eye', 'hair', 'mask', 'headGear', 'headHard', 'headRubber'];
+    const HEAD_GROUPS = ['skin', 'helmet', 'hat', 'eye', 'hair', 'mask', 'headGear', 'headHard', 'headRubber', 'brow', 'lash', 'headset', 'cornea'];
     function updateSelfVisibility() {
       for (let i = 0; i < squad.length; i++) {
         const s = squad[i];
