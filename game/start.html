@@ -9974,6 +9974,94 @@ function buildAK74(THREE, opts) {
     }
   };
 
+  /* ================================================== опора стоп ======== */
+  /* Шаговый цикл задаёт ноги прямой кинематикой от таза, высота которого
+     живёт своей жизнью (присед, покачивание). Длина ноги при этом меняется
+     со сгибом колена, и подошва сама по себе на землю не попадает: на шаге
+     даже опорная стопа висела над землёй до 7 см (на бегу до 13), а в
+     приседе нога уходила в грунт на 15 см.
+
+     Поэтому после позы стопы досаживаются на землю аналитической IK
+     «бедро — колено — голеностоп»: опорная нога дотягивается вниз до грунта,
+     любая нога, ушедшая под землю, поднимается. Если выпрямленной опорной
+     ноге не хватает длины, таз проседает на недостающее (не больше 10 см).
+     Камера и оружие считаются от контроллера, а не от таза, поэтому их это
+     не сдвигает. Ориентация стопы остаётся такой, какой её задал шаговый
+     цикл.
+
+     plant: { R, L } — насколько нога опорная (0 — перенос, 1 — стоит). */
+  const _pv = {};
+  function pv(THREE, k) { return (_pv[k] || (_pv[k] = new THREE.Vector3())); }
+
+  Rig.prototype.plantFeet = function (groundAt, plant) {
+    const THREE = this.THREE;
+    const root = this.char.root;
+    root.updateMatrixWorld(true);
+    const fwd = pv(THREE, 'fwd').set(0, 0, -1).applyQuaternion(root.getWorldQuaternion(tmpQ(THREE, 'root')));
+    const wOf = (SS) => U.clamp01(plant && plant[SS] !== undefined ? plant[SS] : 1);
+    let out = this._plantPass(groundAt, wOf, fwd);
+    /* Опорная нога выпрямлена, а до земли не достала: таз стоит выше, чем
+       позволяет длина ноги (пик покачивания на шаге). Как и у человека,
+       таз проседает на недостающее расстояние, и ноги решаются заново. */
+    const drop = Math.min(0.10, Math.max(0, out.R * wOf('R'), out.L * wOf('L')));
+    if (drop > 1e-3) {
+      const hips = this.bone('hips');
+      hips.position.y -= drop;
+      hips.updateMatrixWorld(true);
+      out = this._plantPass(groundAt, wOf, fwd);
+    }
+    /* остаточный зазор и просадка таза — для автотестов */
+    this.footGap = out;
+    this.hipDrop = drop;
+    return out;
+  };
+
+  Rig.prototype._plantPass = function (groundAt, wOf, fwd) {
+    const THREE = this.THREE, M = this.metrics, rest = this.char.rest;
+    const out = {};
+    for (const SS of ['R', 'L']) {
+      const hip = this.bone('hip' + SS), knee = this.bone('knee' + SS);
+      const ankle = this.bone('ankle' + SS), toe = this.bone('toe' + SS);
+      /* Точки подошвы в системах костей. Кости в покое не повёрнуты, поэтому
+         локальные смещения равны мировым: пятка под голеностопом, подушечка
+         и носок под костью пальцев. Пропорции сняты с подошвы ботинка. */
+      const aY = rest['ankle' + SS][1], tY = rest['toe' + SS][1];
+      const pts = [
+        [ankle, 0, -aY, M.foot * 0.31],
+        [toe, 0, -tY, 0],
+        [toe, 0, -tY, -M.foot * 0.32]
+      ];
+      const lowest = () => {
+        let h = Infinity;
+        for (const q of pts) {
+          const w = q[0].localToWorld(pv(THREE, 'p').set(q[1], q[2], q[3]));
+          h = Math.min(h, w.y - groundAt(w.x, w.z));
+        }
+        return h;
+      };
+      const h = lowest();
+      const w = wOf(SS);
+      /* под землю — всегда наверх; над землёй — вниз с весом опоры */
+      const dy = h < 0 ? -h : -h * w;
+      if (Math.abs(dy) < 5e-4) { out[SS] = h; continue; }
+
+      const footQ = ankle.getWorldQuaternion(new THREE.Quaternion());
+      const target = ankle.getWorldPosition(new THREE.Vector3());
+      target.y += dy;
+      /* колено смотрит вперёд по корпусу */
+      const pole = knee.getWorldPosition(new THREE.Vector3()).addScaledVector(fwd, 0.6);
+      twoBoneIK(THREE, {
+        root: hip, mid: knee, tip: ankle, target, pole,
+        axis: pv(THREE, 'down').set(0, -1, 0)
+      });
+      const kq = knee.getWorldQuaternion(new THREE.Quaternion());
+      ankle.quaternion.copy(kq.invert().multiply(footQ));
+      ankle.updateMatrixWorld(true);
+      out[SS] = lowest();
+    }
+    return out;
+  };
+
   return { Rig, twoBoneIK, alignBone, curlFingers, applyBasePose, GRIP };
 });
 /* ==========================================================================
@@ -12374,6 +12462,12 @@ function buildAK74(THREE, opts) {
       const last = squad[squad.length - 1];
       last.ctrl.pos.set(sp.x, gy, sp.z);
       last.ctrl.yaw = sp.yaw;
+      /* Инерция наводки стартует с фактического курса: при lagYaw = 0 против
+         yaw = PI первые полсекунды ствол разворачивало вбок. */
+      last.ctrl.lagYaw = sp.yaw;
+      last.ctrl.lagPitch = last.ctrl.pitch;
+      /* курс, вокруг которого боец переминается без управления */
+      last.idleYaw = sp.yaw;
       last.ctrl.magCap = 30;
       /* Реакция на выстрел (трассировка, вспышка, гильза, звук) живёт в
          основном цикле — там уже собраны мир и эффекты. Колбэк ставится в
@@ -12847,10 +12941,13 @@ function buildAK74(THREE, opts) {
       /* Насколько цикл «включён»: на месте ноги стоят, на бегу — полный мах. */
       const gait = U.clamp01(c.speed / 1.1);
       const stride = U.lerp(0.30, 0.62, moveAmt) * gait;
+      const plant = {};
       for (const side of [1, -1]) {
         const SS = side > 0 ? 'R' : 'L';
         const phase = ph + (side > 0 ? 0 : Math.PI);
         const sn = Math.sin(phase), cs = Math.cos(phase);
+        /* опорная фаза — sn > 0; на месте обе ноги опорные */
+        plant[SS] = 1 - gait * (1 - U.clamp01(sn * 3 + 0.5));
 
         /* Мах бедра: вперёд в переносе, назад в опоре. */
         const hipSwing = sn * stride;
@@ -12881,6 +12978,9 @@ function buildAK74(THREE, opts) {
         const protract = side < 0 ? blade * 0.34 : -blade * 0.10;
         b('clav' + SS).rotation.set(0, protract, -side * (0.05 + c.ads * 0.05));
       }
+
+      /* стопы — на грунт (см. Rig.plantFeet) */
+      rig.plantFeet(c.groundAt, plant);
 
       return { moveAmt, breath, lean, blade };
     }
@@ -13513,15 +13613,23 @@ function buildAK74(THREE, opts) {
       /* неактивные бойцы стоят на месте, но дышат */
       for (let i = 0; i < squad.length; i++) {
         const s = squad[i];
-        if (i === S.activeIdx) continue;
-        s.ctrl.breathT += dt * 0.85;
+        if (i === S.activeIdx) { s.wasActive = true; continue; }
+        const c = s.ctrl, k = s.idleSeed;
         /* Микродвижение в строю: боец переминается, чуть водит стволом и
            поворачивает голову. Без этого четыре манекена выглядят мёртвыми. */
-        const k = s.idleSeed;
-        s.ctrl.yaw = s.spawn.yaw + Math.sin(t * 0.21 + k) * 0.045
-          + Math.sin(t * 0.07 + k * 2) * 0.03;
-        s.ctrl.pitch = Math.sin(t * 0.17 + k * 1.7) * 0.05 - 0.04;
-        s.ctrl.update(dt, {}, false, t);
+        const swayYaw = Math.sin(t * 0.21 + k) * 0.045 + Math.sin(t * 0.07 + k * 2) * 0.03;
+        const swayPitch = Math.sin(t * 0.17 + k * 1.7) * 0.05 - 0.04;
+        /* Покачивание идёт вокруг курса, с которым бойца ОТПУСТИЛИ. Раньше
+           yaw присваивался от курса спавна: отпущенный боец за один кадр
+           разворачивался до 180°, а оружие, догоняющее взгляд с инерцией,
+           на это время выносило вбок, мимо рук. Выход ловится по факту
+           смены активного бойца — так покрыты и F, и смена бойца, и view. */
+        if (s.wasActive) { s.idleYaw = c.yaw - swayYaw; s.wasActive = false; }
+        c.breathT += dt * 0.85;
+        /* Взгляд возвращается к позе покоя плавно, а не скачком. */
+        c.yaw = U.dampAngle(c.yaw, s.idleYaw + swayYaw, 3, dt);
+        c.pitch = U.damp(c.pitch, swayPitch, 3, dt);
+        c.update(dt, {}, false, t);
       }
 
       /* 2-4. поза, оружие, руки */
